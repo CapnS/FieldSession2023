@@ -1,9 +1,6 @@
-sys
 nltk
 spacy
 phonenumbers
-re
-uuid
 PyPDF2
 transformers
 snowflake
