@@ -7,6 +7,9 @@ import re
 import uuid
 import PyPDF2
 from transformers import pipeline
+import snowflake.connector
+from dotenv import load_dotenv
+import os
 
 # N - Name 
 # A - Address 
@@ -346,6 +349,49 @@ def replace(text):
     # write to file 
     pass
 
+#Database 
+
+load_dotenv()
+SNOWFLAKE_PASSWORD = os.getenv("SNOWFLAKE_PASSWORD")
+
+con_def = snowflake.connector.connect(user='BRENDANMORONEY',
+                                     account='ydpcciy-xn91624',
+                                     password =SNOWFLAKE_PASSWORD,
+                                     database='PII_TOKENIZATION',        
+                                     schema ='PUBLIC',
+                                     autocommit=True)         
+
+db_cursor_def = con_def.cursor()
+
+db_cursor_def.execute("CREATE WAREHOUSE IF NOT EXISTS pii_warehouse")
+db_cursor_def.execute("USE WAREHOUSE pii_warehouse")
+
+db_cursor_def.execute("CREATE DATABASE IF NOT EXISTS PII_TOKENIZATION")
+db_cursor_def.execute("USE DATABASE PII_TOKENIZATION")
+
+db_cursor_def.execute("CREATE SCHEMA IF NOT EXISTS PUBLIC")
+db_cursor_def.execute("USE SCHEMA PII_TOKENIZATION.PUBLIC")
+
+#Creates table with PII_value, PII_type and ID
+
+db_cursor_def.execute("""CREATE OR REPLACE TABLE 
+PII_TOKENIZATION.PUBLIC.PII_Token_XREF (Token TEXT, PII_VALUE 
+VARCHAR(16777216),PII_TYPE VARCHAR(16777216), rec_created_date TIMESTAMP, 
+user_added TEXT, updated_date TIMESTAMP, PRIMARY KEY(Token))""")
+
+#Creates log table
+
+db_cursor_def.execute("""CREATE OR REPLACE TABLE PII_TOKENIZATION.PUBLIC.log 
+(time TIMESTAMP, user TEXT, document TEXT, PII_type TEXT, override 
+boolean)""")
+                      
+#Practice insert
+
+db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES('c2783f59-743e-403c-beac-21cb67076292','Rick Owens', 'N')")
+
+db_cursor_def.close()
+
 if __name__ == "__main__":
     text = sys.argv()[1]
     remove(text) if sys.argv()[2] == "1" else replace(text)
+

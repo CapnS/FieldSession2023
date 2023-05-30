@@ -5,3 +5,5 @@ PyPDF2
 transformers
 snowflake
 tensorflow
+snowflake-connector-python
+dotenv
