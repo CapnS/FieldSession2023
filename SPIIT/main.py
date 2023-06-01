@@ -419,10 +419,13 @@ def remove(text):
         
     print(token_list)            
     #print("String with UUID pii: ")
-    return text
-    
 
     # TODO: Write to file
+    
+    return (text, token_list)
+    
+
+    
 
 def replace(text):
     # new_text = replace_with_pii(text)

@@ -4,9 +4,9 @@ sys.path.insert(1, 'C:\\Users\\zacha\\Documents\\Python\\GPT4 LangChain PII Toke
 from main import remove
 
 def scrubPII(input):
-    return remove(input)
+    return remove(input)[0]
 
-class TestStringMethods(unittest.TestCase):
+class TestDetectionMethods(unittest.TestCase):
 
     def test_phonenumbers(self):
         self.assertEqual(scrubPII("Hello, my phone number is 713-392-8748"), "Hello, my phone number is xxxxxxxxxx")
