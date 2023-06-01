@@ -1,6 +1,6 @@
 import unittest
 import sys
-sys.path.insert(1, 'C:\\Users\\zacha\\Documents\\Python\\GPT4 LangChain PII Tokenization\\Project-2-Secure-PII-Tokenization-for-LLMs\\SPIIT')
+sys.path.insert(1, 'C:\\Users\\Svetlana Sedova\\Documents\\Homework\\CSCI307\\CSCI307\\Project-2-Secure-PII-Tokeniation-for-LLM\\SPIIT')
 from main import remove
 
 def scrubPII(input):
