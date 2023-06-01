@@ -420,17 +420,34 @@ def remove(text):
     print(token_list)            
     #print("String with UUID pii: ")
 
-    # TODO: Write to file
+    # Writing to File
     
+    with open('updatedFiles/output.txt', 'w') as file:
+        file.write(text3)
+
+    # TODO: Upload all tokens to database
+
     return (text, token_list)
     
 
     
 
 def replace(text):
-    # new_text = replace_with_pii(text)
-    # write to file 
-    pass
+    # Here we need to decide whether we should get a dict of all token-> PII or just look through the database every time we hit a token in the text
+    # Don't know which is faster, but since we shouldn't expect many tokens to be in the response (which is where we are replacing) it is probably
+    # faster to only search for the tokens that are actually necessary 
+    new_text = text.split(' ')
+    for i, word in enumerate(text.split(' ')):
+        if re.match(r'[A-Z]-[a-z0-9]{32}', word):
+            pii = "test_pii" + str(i) # here is where we would either use our large dict or search the database for the specific token
+            new_text[i] = pii
+    new_text = ' '.join(new_text)
+
+    # Writing to File
+    with open('updatedFiles/output.txt', 'w') as file:
+        file.write(new_text)
+
+    return new_text
 
 #Database 
 
