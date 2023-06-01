@@ -10,7 +10,6 @@ from transformers import pipeline
 import snowflake.connector
 from dotenv import load_dotenv
 import os
-import datetime
 
 # N - Name 
 # A - Address 
@@ -442,7 +441,6 @@ def replace(text):
 #TODO: Write function to initialize snowflake connection and databases
 #Database 
 def send_to_snowflake(token_list):
-    ct = datetime.datetime.now()
     load_dotenv()
     SNOWFLAKE_PASSWORD = os.getenv("SNOWFLAKE_PASSWORD")
 
