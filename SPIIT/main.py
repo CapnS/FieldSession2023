@@ -192,12 +192,13 @@ def remove(text):
             if not text[end_ind].isspace() and text[end_ind] not in punc_list:
                 end_ind = text.find(" ", end_ind)
                 temp = text[start_ind:end_ind]
-            people_list.append(temp)
+            if word not in people_list:
+                people_list.append(temp)
             #mask it with xxx for testing purposes 
-            x = 'x';
-            for n in range (len(temp)-1):
-                x = x + 'x';             
-            text = text[:start_ind] + x + text[start_ind+len(x):]
+                x = 'x';
+                for n in range (len(temp)-1):
+                    x = x + 'x';             
+                text = text[:start_ind] + x + text[start_ind+len(x):]
         elif entity_label == "MISC":
             # check if the word is complete since the model sometimes tempts to grab just the beginning of the name 
             temp = entity_group["word"]
