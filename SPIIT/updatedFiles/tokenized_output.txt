@@ -1,0 +1,89 @@
+A-d5f739b6f5ae42ca8db5617dc9f8c864List of People and Their SSNs:
+
+        N-fe31e8d90f8e49718657fe6b833d041d: S-fc3a2259b8074624a365154439b5c0b8
+        N-49d0adeab5864359bb55d39e771afbb5: S-1b1c50c06e90422b951b980e70180250
+        N-ededca21656f4083879a15d9ac2712d8: 982-63-6324
+        N-1649fa28ba52461fbb1b961a9e25090e: S-5f622ec05b6c4ef884b76d2c0016261c
+
+
+        List of Those People and Their Favorite A-7f595562dea84cf4a5391f5b07c01177        N-8951c14168be48548ac0b70b53f95e1b: Chocolate
+        N-6c5e19bf94a9480fbd25a445c966c62e: Vanilla
+        N-97b40286fbbd4212aa38de4947b4021c: Strawberry
+        N-326c8205ffb44805a4d942f6d18ca4d9: A-9ec9b4ce30e64d7ab432d819405d8e64 N-b3423534226f4a1086bb3a99648fb7d2
+
+
+        List of Those People and Their Email Addresses:
+
+        N-ce7b8dd8dbcd4cbca5ea28df4b203f9b: E-2e1db3becd8949eba5cfcd0335179e72
+        N-81023784ded84c2bb9d3b3fecac6a45f: E-ef4dd9f0d5af43c7a0d25bd635da25c4
+        N-5d892c29f7e54d338632e1527e951ef7 Jimmy: E-4debeb83938f40cb929f13e0382755a2
+        N-cc62454bc5a449f69a33f55e3de9c7a6: E-f3a7f64307d04b21927435ffdf880bae
+
+
+        List of Those People and Their Hair Color:
+
+        N-a5ceeae806f847ee9483a474593decee: Brown
+        Max N-a79b5f9f223e4137acfd967bf877e664: Brown
+        N-6854212d698f4a80a23865c8f2fa6358: Blonde
+        N-b5191766f59f45c583aab307ce833bdc: Red
+
+
+        List of Those People and Their Home Address:
+
+        N-a0e55ef41ed542e587def898035ad2ad A-861a7bb86e7a4d9e8ba85dedae35103e: 8190 Elmora Street
+        N-79d63fd8151e4778b9b6aa748666165f: 1020 Illinois St.
+        U-9dcba99b0bca4904acc3b68cbbb19a13: 834 Jim blvd.
+        N-92843869da5347018e1a7a1300db99a0: A-22d8ba9c91a944a08d53dddac2eb0deb Ct.
+
+        List of Those People and Their Favorite Board Game:
+
+        N-44a1966123de46f8b9d4440b67a4985e: Monopoly
+        Max Johnson: Chutes and Ladders
+        Jim Jimmy: Sorry
+        N-e9b42343306f45c98ed697e2c5a5b8c5: Settlers A-204aca4746044c4198e9d7fc7b9ec121
+       A-89dda17c622049698359547ca6ebea25SSNs:
+
+        N-fe31e8d90f8e49718657fe6b833d041d: S-fc3a2259b8074624a365154439b5c0b8
+        N-49d0adeab5864359bb55d39e771afbb5: S-1b1c50c06e90422b951b980e70180250
+        N-ededca21656f4083879a15d9ac2712d8: 982-63-6324
+        N-1649fa28ba52461fbb1b961a9e25090e: S-5f622ec05b6c4ef884b76d2c0016261c
+
+
+        List of Those People and Their Favorite Ice Cream:
+
+        N-8951c14168be48548ac0b70b53f95e1b: Chocolate
+        N-6c5e19bf94a9480fbd25a445c966c62e: Vanilla
+        N-97b40286fbbd4212aa38de4947b4021c: Strawberry
+        N-326c8205ffb44805a4d942f6d18ca4d9: A-9ec9b4ce30e64d7ab432d819405d8e64 N-b3423534226f4a1086bb3a99648fb7d2
+
+
+        List of Those People and Their Email Addresses:
+
+        N-ce7b8dd8dbcd4cbca5ea28df4b203f9b: E-c162909901794522b270d581dbc76dad
+        N-81023784ded84c2bb9d3b3fecac6a45f: E-55ec0a1e71e84166833208d488964687
+        N-5d892c29f7e54d338632e1527e951ef7 Jimmy: E-105632f9c9ac436bb658c47238b0cb6a
+        N-cc62454bc5a449f69a33f55e3de9c7a6: E-9b867ceac37048119e12c5cf38c43df1
+
+
+        List of Those People and Their Hair Color:
+
+        N-a5ceeae806f847ee9483a474593decee: Brown
+        Max N-a79b5f9f223e4137acfd967bf877e664: Brown
+        N-6854212d698f4a80a23865c8f2fa6358: Blonde
+        N-b5191766f59f45c583aab307ce833bdc: Red
+
+
+        List of Those People and Their Home Address:
+
+        N-a0e55ef41ed542e587def898035ad2ad A-861a7bb86e7a4d9e8ba85dedae35103e: 8190 Elmora Street
+        N-79d63fd8151e4778b9b6aa748666165f: 1020 Illinois St.
+        Jim Jimmy: 834 Jim blvd.
+        N-92843869da5347018e1a7a1300db99a0: 5 Waverly Ct.
+
+        List of Those People and Their Favorite Board Game:
+
+        N-44a1966123de46f8b9d4440b67a4985e: Monopoly
+        Max Johnson: Chutes and Ladders
+        Jim Jimmy: Sorry
+        N-e9b42343306f45c98ed697e2c5a5b8c5: Settlers of Catan
+        

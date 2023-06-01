@@ -34,6 +34,7 @@ def remove(text):
     mac_validate_pattern = "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})|([0-9a-fA-F]{4}\\.[0-9a-fA-F]{4}\\.[0-9a-fA-F]{4})$"
     passport_pattern_old = r"^[A-Z0-9]{9}$"
     passport_pattern_new = r"^[A-Z]\d{8}$"
+    Dl_pattern = ["^[0-9]{7}$","^[A-Z]{1}[0-9]{8}$", "^[0-9]{9}", "^[0-9]{8}$", "^[A-Z]{1}[0-9]{7}$", "(^[A-Z]{1}[0-9]{3,6}$)|(^[A-Z]{2}[0-9]{2,5}$)", "^[A-Z]{1}[0-9]{12}$", "^[A-Z]{2}[0-9]{6}[A-Z]{1}$", "^[A-Z]{1}[0-9]{11,12}$","^[0-9]{10}", "^([0-9]{9}|([0-9]{3}[A-Z]{2}[0-9]{4}))$","^[A-Z]{2}[0-9]{6-7}$", "^[A-Z]{1}[0-9]{9-10}$", "(^[A-Z]{1}[0-9]{5,9}$)|(^[A-Z]{1}[0-9]{6}[R]{1}$)|(^[0-9]{3}[A-Z]{1}[0-9]{6}$)|(^[0-9]{8}[A-Z]{2}$)|(^[0-9]{9}[A-Z]{1}$)","(^[A-Z]{1}[0-9]{8}$)|(^[0-9]{13}$)|(^[0-9]{14}$)", "(^[0-9]{2}[A-Z]{3}[0-9]{5}$)|(^[A-Z]{3}[0-9]{8}$)","^[A-Z]{1}[0-9]{14}$","^[0-9]{12}$","^[A-Z]{3}[0-9]{6}$", "^[0-9]{7}[A-Z]$"]
     # we can add more cc types
     amex_validate_pattern = "^3[47][0-9]{13}$"
     visa_validate_pattern = "^4[0-9]{12}(?:[0-9]{3})?$"
@@ -48,11 +49,18 @@ def remove(text):
     '''
     text2 = text 
     text4 = text 
-    
 
-    #load text in nlp
-    ner = pipeline("ner", model=ner_model, grouped_entities=True)
-    output = ner(text)
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+
+    pd = open(os.path.join(dir_path, os.path.join('dependencies', 'names dataset.pdf')), 'rb')
+    pdf = PyPDF2.PdfReader(pd)
+    num_pages = len(pdf.pages)
+    names_dataset = ""
+    for i in range(num_pages):
+        page = pdf.pages[i]
+        names_dataset += page.extract_text()
+
+
 
     #print(output)
 
@@ -80,11 +88,60 @@ def remove(text):
     ip_list = []
     cc_list = []
     passport_list = []
+    dl_list = []
     all_pii = []
+
+    # extract punctuation for better performance of the libraries 
+    for i in text4:
+        if i in punc_list:
+            if i == '.':
+                text4 = text4.replace(i, " ")
+            else:
+                text4 = text4.replace(i, "")
+
+    # detect passport number and replace it with xxx
+    # only new passports have a format that unique from other 
+    for word in text4.split():
+        #edge case: make sure that there is no punctuation after the passport number; otherwise, it will not be detected
+        if word[-1] in punc_list:
+            word = word[:-1]
+        if (re.match(passport_pattern_new, word)):
+            passport_list.append(word)
+            x = 'x';
+            for n in range (len(word)-1):
+                x = x + 'x'; 
+            text = text.replace(word, x)
+
+    # detect ssn and replace it with xxx
+    for word in text.split():
+        #edge case: make sure that there is no punctuation after the ssn; otherwise, it will not be detected
+        #all the punctuation can not be extracted at this point because "-" are part of the ssn
+        if word[-1] in punc_list:
+            word = word[:-1]
+        if (re.match(ssn_validate_pattern, word)):
+            # append ssn to ssn_list
+            ssn_list.append(word)
+            x = 'x';
+            for n in range (len(word)-1):
+                x = x + 'x'; 
+            text = text.replace(word, x)
+
+        
+    new_list = []
+    new_list.append("S")
+    new_list.append(ssn_list)
+    all_pii.append(new_list)        
+            
+
+    #load text in nlp
+    ner = pipeline("ner", model=ner_model, grouped_entities=True)
+    output = ner(text)
 
     #parts of the addresses sometimes wrongfully identified as names, so addresses needs to extracted first to avoid that 
     for entity_group in output:
-        entity_label = entity_group["entity_group"]  
+        entity_label = entity_group["entity_group"] 
+        #print(entity_group["entity_group"])
+        #print(entity_group["word"])
         if entity_label == "LOC":
             temp = entity_group["word"]
             start_ind = text.find(temp)
@@ -115,28 +172,7 @@ def remove(text):
             text = text[:start_ind] + x + text[start_ind+len(x):]
     #print(text)
 
-    # extract punctuation for better performance of the libraries 
-    for i in text4:
-        if i in punc_list:
-            if i == '.':
-                text4 = text4.replace(i, " ")
-            else:
-                text4 = text4.replace(i, "")
-
-    # detect passport number and replace it with xxx
-    # only new passports have a format that unique from other 
-    for word in text4.split():
-        #edge case: make sure that there is no punctuation after the passport number; otherwise, it will not be detected
-        if word[-1] in punc_list:
-            word = word[:-1]
-        if (re.match(passport_pattern_new, word)):
-
-            passport_list.append(word)
-            x = 'x';
-            for n in range (len(word)-1):
-                x = x + 'x'; 
-            text = text.replace(word, x)
-            
+        
     new_list = []
     new_list.append("R")
     new_list.append(passport_list)
@@ -165,6 +201,7 @@ def remove(text):
         elif entity_label == "MISC":
             # check if the word is complete since the model sometimes tempts to grab just the beginning of the name 
             temp = entity_group["word"]
+
             start_ind = text.find(temp)
             end_ind = start_ind + len(temp)
             if not text[end_ind].isspace() and text[end_ind] not in punc_list:
@@ -179,8 +216,18 @@ def remove(text):
         elif entity_label == "ORG":
             org_list.append(entity_group["word"])
 
+    # this is a second layer that checks if the names that were detected are in the dataset of 10 000 common names that we have created       
+    for name in people_list:
+        first = name.split()
+        if first[0] not in names_dataset:
+            people_list.remove(name)
+    # check if any names were appended into undefined list, pop it from there and move it to the list of names 
+    for word in undefined:
+        first = name.split()
+        if first[0] in names_dataset:
+            undefined.remove(word)
+            people_list.append(word)
             
-
     # create temporary new lists that will hold the char associated with pii and a list of all piis 
     # then append each list in one nested list all_pii 
     # so we end up getting something like this:
@@ -219,13 +266,35 @@ def remove(text):
                         x = x + 'x';             
                     text = text[:index] + x + text[index+len(x):]
                 
+    # detect dl and replace it with xxx
+    for word in text.split():
+        #edge case: make sure that there is no punctuation after the dl; otherwise, it will not be detected
+        if word[-1] in punc_list:
+            word = word[:-1]
+        for format in Dl_pattern:
+            if (re.match(format, word)):
+            # append dl to dl_list
+                if word not in dl_list:
+                    dl_list.append(word)
+                    x = 'x';
+                    for n in range (len(word)-1):
+                        x = x + 'x'; 
+                    text = text.replace(word, x)
 
+            
+    new_list = []
+    new_list.append("D")
+    new_list.append(dl_list)
+    all_pii.append(new_list)        
+            
+                
+                
     # The code below will handle all the pii that NLP did not detect
     #--------------------------------------------------------------------
     # Extract sentences that have keywords and insert them into new_list 
 
     new_list = []
-    tok_text = tokenize.sent_tokenize(text2)
+    tok_text = tokenize.sent_tokenize(text)
     for sentence in tok_text:
         for word in undetected_pii_list:        
             if word in sentence:
@@ -286,24 +355,7 @@ def remove(text):
     #if len(clean_undetected_list) > 0:
         #all_pii.append(clean_undetected_list)
 
-    # detect ssn and replace it with xxx
-    for word in text.split():
-        #edge case: make sure that there is no punctuation after the ssn; otherwise, it will not be detected
-        #all the punctuation can not be extracted at this point because "-" are part of the ssn
-        if word[-1] in punc_list:
-            word = word[:-1]
-        if (re.match(ssn_validate_pattern, word)):
-            # append ssn to ssn_list
-            ssn_list.append(word)
-            x = 'x';
-            for n in range (len(word)-1):
-                x = x + 'x'; 
-            text = text.replace(word, x)
-            
-    new_list = []
-    new_list.append("S")
-    new_list.append(ssn_list)
-    all_pii.append(new_list)
+
 
     # detect phone numbers and replace them with xxx       
     for match in phonenumbers.PhoneNumberMatcher(text, "US"):
@@ -397,8 +449,18 @@ def remove(text):
                     for n in range (len(word)-1):
                         x = x + 'x';             
                     text = text[:index] + x + text[index+len(x):]
+    #print()
+    #print("String with masked pii: ")
+    #print(text)
     new_list = []
     new_list.append("D")
+    #new_list.append(date_list)
+
+    # We have to figure out what to do with dates; we will probably just have to manually check if they match the format of the DOB because we don't 
+    # need to tokenize all the dates 
+
+    #all_pii.append(new_list)
+    print(all_pii)
 
     token_list = []
 
@@ -415,14 +477,12 @@ def remove(text):
                 temp.append(str.hex)
                 text3 = text3[:index] + char + "-" + str.hex + text3[index+len(element):]
                 token_list.append(temp)
-                
-        
     print(token_list)            
     #print("String with UUID pii: ")
 
     # Writing to File
-    
-    with open('updatedFiles/output.txt', 'w') as file:
+
+    with open(os.path.join(dir_path, 'updatedFiles\\tokenized_output.txt'), 'w') as file:
         file.write(text3)
 
     # TODO: Upload all tokens to database
@@ -444,7 +504,8 @@ def replace(text):
     new_text = ' '.join(new_text)
 
     # Writing to File
-    with open('updatedFiles/output.txt', 'w') as file:
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    with open(os.path.join(dir_path, 'updatedFiles\\detokenizedoutput.txt'), 'w') as file:
         file.write(new_text)
 
     return new_text
