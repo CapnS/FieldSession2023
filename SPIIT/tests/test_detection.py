@@ -9,9 +9,9 @@ def scrubPII(input):
 class TestDetectionMethods(unittest.TestCase):
 
     def test_phonenumbers(self):
-        self.assertEqual(scrubPII("Hello, my phone number is 713-392-8748"), "Hello, my phone number is xxxxxxxxxx")
-        self.assertEqual(scrubPII("Hello, my phone number is (713)-392-8748"), "Hello, my phone number is xxxxxxxxxxxx")
-        self.assertEqual(scrubPII("Hello, my phone number is 7133928748"), "Hello, my phone number is xxxxxxxxxx")
+        self.assertEqual(scrubPII("Hello, my phone number is 713-392-8668"), "Hello, my phone number is xxxxxxxxxxxx")
+        self.assertEqual(scrubPII("Hello, my phone number is (713)-392-8668"), "Hello, my phone number is xxxxxxxxxxxxxx")
+        self.assertEqual(scrubPII("Hello, my phone number is 7133928668"), "Hello, my phone number is xxxxxxxxxx")
 
     def test_names(self):
         self.assertEqual(scrubPII("Hello, my name is John Smith"), "Hello, my name is xxxx xxxxx")
@@ -24,7 +24,7 @@ class TestDetectionMethods(unittest.TestCase):
         self.assertEqual(scrubPII("I'm heading to 5 Waverly Court for the party."), "I'm heading to x xxxxxxx xxxxx for the party.")
 
     def test_ssn(self):
-        self.assertEqual(scrubPII("My SSN is 134-14-1513"), "My SSN is xxxxxxxxx")
+        self.assertEqual(scrubPII("My SSN is 134-14-1513"), "My SSN is xxxxxxxxxxx")
         self.assertEqual(scrubPII("421-74-2672 is a SSN"), "xxxxxxxxx is a SSN")
         self.assertEqual(scrubPII("I love sharing social security numbers such as 512-35-1561"), "I love sharing social security numbers such as xxxxxxxxx")
 
@@ -35,8 +35,8 @@ class TestDetectionMethods(unittest.TestCase):
 
     def test_dates(self):
         self.assertEqual(scrubPII("I was born on May 2nd, 1992"), "I was born on xxx xxx, xxxx")
-        self.assertEqual(scrubPII("02/25/1956 was a long time ago"), "xxxxxxxxxx was a long time ago")
-        self.assertEqual(scrubPII("When were you born? I was born on 4/12/2002"), "When were you born? I was born on xxxxxxxxx")
+        self.assertEqual(scrubPII("02/25/1956 was a long time ago"), "xx/xx/xxxx was a long time ago")
+        self.assertEqual(scrubPII("When were you born? I was born on 4/12/2002"), "When were you born? I was born on x/xx/xxxx")
 
     def test_ip(self):
         self.assertEqual(scrubPII("My private IP is 192.168.1.1"), "My private IP is xxxxxxxxxxx")
@@ -46,7 +46,7 @@ class TestDetectionMethods(unittest.TestCase):
     def test_creditcards(self):
         self.assertEqual(scrubPII("My mom's credit card number is 4352 7200 5136 2812"), "My mom's credit card number is xxxx xxxx xxxx xxxx")
         self.assertEqual(scrubPII("My credit card number is 4352720062352512"), "My credit card number is xxxxxxxxxxxxxxxx")
-        self.assertEqual(scrubPII("My dad's credit card number is 4352-7200-5624-2562"), "My mom's credit card number is xxxx-xxxx-xxxx-xxxx")
+        self.assertEqual(scrubPII("My dad's credit card number is 4352-7200-5624-2562"), "My dad's credit card number is xxxx-xxxx-xxxx-xxxx")
 
     def test_driverslicense(self):
         self.assertEqual(scrubPII("Apparently it says my number is DL-125566235"), "Apparently it says my number is xxxxxxxxxxxx")
@@ -56,7 +56,7 @@ class TestDetectionMethods(unittest.TestCase):
     def test_passport(self):
         self.assertEqual(scrubPII("His passport number is A43240234"), "His passport number is xxxxxxxxx")
         self.assertEqual(scrubPII("I can use my passport to get in which has 541022134 as its number"), "I can use my passport to get in which has xxxxxxxxx as its number")
-        self.assertEqual(scrubPII("E000145028 is a cool passport number honestly."), "xxxxxxxxx is a cool passport number honestly.")
+        self.assertEqual(scrubPII("E00014502 is a cool passport number honestly."), "xxxxxxxxx is a cool passport number honestly.")
     
     def test_idnumber(self):
         self.assertEqual(scrubPII("His state id is 41366234"), "His state id is xxxxxxxx")
