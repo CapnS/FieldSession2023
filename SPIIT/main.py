@@ -176,7 +176,7 @@ def remove(text):
             if isDigit and len(p_word) < 5:
                 start_ind = previous_word
                 temp = p_word + " " + temp 
-            address_list.append(temp)
+            address_list.append(temp) if temp not in address_list else print()
             #mask it with xxx for testing purposes 
             x = 'x';
             for n in range (len(temp)-1):
@@ -231,18 +231,21 @@ def remove(text):
             temp = entity_group["word"]
             if temp not in org_list:
                 org_list.append(temp)
-
+    
+    
     # this is a second layer that checks if the names that were detected are in the dataset of 10 000 common names that we have created       
     for name in people_list:
         first = name.split()
         if first[0] not in names_dataset:
             people_list.remove(name)
+    
+    
     # check if any names were appended into undefined list, pop it from there and move it to the list of names 
     for word in undefined:
-        first = name.split()
+        first = word.split()
         if first[0] in names_dataset:
             undefined.remove(word)
-            people_list.append(word)
+            people_list.append(word)            
             
     # create temporary new lists that will hold the char associated with pii and a list of all piis 
     # then append each list in one nested list all_pii 
@@ -495,12 +498,14 @@ def remove(text):
                 temp.append(element)
                 index = text3.find(element)
                 #CHECK TO SEE IF PII ALREADY IN DATABASE (IF SO, USE STORED TOKEN INSTEAD OF MAKING NEW ONE)
-                if(db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE PII_VALUE = " + element)):
-                    str = db_cursor_def.execute("SELECT Token FROM PII_TOKEN_XREF WHERE PII_VALUE = " + element)
+                if(db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE PII_VALUE = %s", element).fetchone()):
+                    token = db_cursor_def.execute("SELECT Token FROM PII_TOKEN_XREF WHERE PII_VALUE = %s", element).fetchone()[0]
                 else:
-                    str = uuid.uuid4() 
-                temp.append(str.hex)
-                text3 = text3[:index] + char + "-" + str.hex + text3[index+len(element):]
+                    token = uuid.uuid4().hex
+                
+                temp.append(token)
+                
+                text3 = text3[:index] + char + "-" + token + text3[index+len(element):]
                 token_list.append(temp)
                 
         
@@ -516,7 +521,8 @@ def remove(text):
     #LOOP THROUGH LIST AND UPLOAD ALL TOKENS TO DATABASE HERE
     
     for token in token_list:
-        db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES(%s, %s, %s)", (token[2], token[1], token[0]))
+        if not(db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE PII_VALUE = %s", element).fetchall()):    
+            db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES(%s, %s, %s)", (token[2], token[1], token[0]))
     return (text, token_list)
 
 
@@ -573,10 +579,10 @@ def database_creation():
 
     #Creates table with PII_value, PII_type and ID
 
-    '''
+    
     db_cursor_def.execute("""CREATE OR REPLACE TABLE 
     PII_TOKENIZATION.PUBLIC.PII_Token_XREF (Token TEXT, PII_VALUE 
-    VARCHAR(16777216),PII_TYPE VARCHAR(16777216), rec_created_date TIMESTAMP, 
+    TEXT,PII_TYPE VARCHAR(16777216), rec_created_date TIMESTAMP, 
     user_added TEXT, updated_date TIMESTAMP, PRIMARY KEY(Token))""")
 
     #Creates log table
@@ -589,7 +595,7 @@ def database_creation():
     #TODO when PII is matched to Token, add functionality to store and remove from database
 
     #db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES('c2783f59-743e-403c-beac-21cb67076292','Rick Owens', 'N')")
-    '''
+    
 
 
 database_creation()

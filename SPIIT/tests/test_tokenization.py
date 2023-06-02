@@ -64,9 +64,11 @@ class TestTokenizationMethods(unittest.TestCase):
             tokenDict.update({token[1]: token[2]})
         tokenList2 = tokenizePII(text)
         for token in tokenList2:
+            print(token[1],token[2],tokenDict[token[1]])
             self.assertTrue(tokenDict[token[1]] == token[2])
         tokenList3 = tokenizePII(text)
         for token in tokenList3:
+            print(token[1],token[2],tokenDict[token[1]])
             self.assertTrue(tokenDict[token[1]] == token[2])
 
     
