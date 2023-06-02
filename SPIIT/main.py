@@ -523,24 +523,21 @@ def remove(text):
     for token in token_list:
         if not(db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE PII_VALUE = %s", element).fetchall()):    
             db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES(%s, %s, %s)", (token[2], token[1], token[0]))
-    return (text, token_list)
+    return (text, token_list, text3)
 
 
     
 
-def replace(text, tokenDict=None):
+def replace(text):
     # Here we need to decide whether we should get a dict of all token-> PII or just look through the database every time we hit a token in the text
     # Don't know which is faster, but since we shouldn't expect many tokens to be in the response (which is where we are replacing) it is probably
     # faster to only search for the tokens that are actually necessary 
     new_text = text.split(' ')
     for i, word in enumerate(text.split(' ')):
         if re.match(r'[A-Z]-[a-z0-9]{32}', word):
-            if tokenDict:
-                pii = tokenDict[word]
-                new_text[i] = pii
-            else:
-                # TODO: BRENDAN, here is where we would either use our large dict or search the database for the specific token
-                pass
+            token = word[2:34]
+            pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
+            new_text[i] = pii
     new_text = ' '.join(new_text)
 
     # Writing to File
