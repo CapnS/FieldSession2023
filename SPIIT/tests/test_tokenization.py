@@ -1,6 +1,8 @@
 import unittest
 import sys
-sys.path.insert(1, 'C:\\Users\\zacha\\Documents\\Python\\GPT4 LangChain PII Tokenization\\Project-2-Secure-PII-Tokenization-for-LLMs\\SPIIT')
+import pathlib
+import os
+sys.path.insert(1, str(pathlib.Path(os.path.abspath(__file__)).parent.parent))
 from main import remove
 import PyPDF2
 

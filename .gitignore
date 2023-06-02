@@ -38,3 +38,8 @@ next-env.d.ts
 
 #Notion_db
 /Notion_DB
+
+/docs
+/ingested_docs
+
+SPIIT/updatedFiles
