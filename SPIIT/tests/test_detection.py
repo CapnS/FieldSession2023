@@ -1,6 +1,8 @@
 import unittest
 import sys
-sys.path.insert(1, 'C:\\Users\\Svetlana Sedova\\Documents\\Homework\\CSCI307\\CSCI307\\Project-2-Secure-PII-Tokeniation-for-LLM\\SPIIT')
+import os
+import pathlib
+sys.path.insert(1, str(pathlib.Path(os.path.abspath(__file__)).parent.parent))
 from main import remove
 
 def scrubPII(input):
