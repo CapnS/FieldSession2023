@@ -8,7 +8,7 @@ import re
 import uuid
 import PyPDF2
 from transformers import pipeline
-
+import snowflake.connector
 from dotenv import load_dotenv
 import os
 
@@ -522,15 +522,19 @@ def remove(text):
 
     
 
-def replace(text):
+def replace(text, tokenDict=None):
     # Here we need to decide whether we should get a dict of all token-> PII or just look through the database every time we hit a token in the text
     # Don't know which is faster, but since we shouldn't expect many tokens to be in the response (which is where we are replacing) it is probably
     # faster to only search for the tokens that are actually necessary 
     new_text = text.split(' ')
     for i, word in enumerate(text.split(' ')):
         if re.match(r'[A-Z]-[a-z0-9]{32}', word):
-            pii = "test_pii" + str(i) # here is where we would either use our large dict or search the database for the specific token
-            new_text[i] = pii
+            if tokenDict:
+                pii = tokenDict[word]
+                new_text[i] = pii
+            else:
+                # TODO: BRENDAN, here is where we would either use our large dict or search the database for the specific token
+                pass
     new_text = ' '.join(new_text)
 
     # Writing to File
@@ -545,7 +549,6 @@ def replace(text):
 #Database 
 
 def database_creation():
-    import snowflake.connector
     load_dotenv()
     SNOWFLAKE_PASSWORD = os.getenv("SNOWFLAKE_PASSWORD")
 
@@ -570,6 +573,7 @@ def database_creation():
 
     #Creates table with PII_value, PII_type and ID
 
+    '''
     db_cursor_def.execute("""CREATE OR REPLACE TABLE 
     PII_TOKENIZATION.PUBLIC.PII_Token_XREF (Token TEXT, PII_VALUE 
     VARCHAR(16777216),PII_TYPE VARCHAR(16777216), rec_created_date TIMESTAMP, 
@@ -584,12 +588,13 @@ def database_creation():
     #Practice insert
     #TODO when PII is matched to Token, add functionality to store and remove from database
 
-    db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES('c2783f59-743e-403c-beac-21cb67076292','Rick Owens', 'N')")
+    #db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES('c2783f59-743e-403c-beac-21cb67076292','Rick Owens', 'N')")
+    '''
     
-    db_cursor_def.close()
+    return db_cursor_def
 
-
+database_creation()
 if __name__ == "__main__":
-    text = sys.argv[1]
+
     remove(text) if sys.argv[2] == "1" else replace(text)
 
