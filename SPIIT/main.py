@@ -590,8 +590,7 @@ def database_creation():
 
     #db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES('c2783f59-743e-403c-beac-21cb67076292','Rick Owens', 'N')")
     '''
-    
-    return db_cursor_def
+
 
 database_creation()
 if __name__ == "__main__":
