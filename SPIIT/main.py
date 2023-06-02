@@ -540,11 +540,9 @@ def replace(text):
 
     return new_text
 
+
 #TODO: Write function to initialize snowflake connection and databases
 #Database 
-def send_to_snowflake(token_list):
-    load_dotenv()
-    SNOWFLAKE_PASSWORD = os.getenv("SNOWFLAKE_PASSWORD")
 
 def database_creation():
     import snowflake.connector
@@ -558,7 +556,7 @@ def database_creation():
                                         schema ='PUBLIC',
                                         autocommit=True)         
 
-    global db_cursor_def
+    global db_cursor_def 
     db_cursor_def = con_def.cursor()
 
     db_cursor_def.execute("CREATE WAREHOUSE IF NOT EXISTS pii_warehouse")
