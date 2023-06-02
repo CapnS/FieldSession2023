@@ -6,4 +6,4 @@ transformers
 snowflake
 tensorflow
 snowflake-connector-python
-dotenv
+python-dotenv
