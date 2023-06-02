@@ -494,8 +494,11 @@ def remove(text):
                 temp.append(char)
                 temp.append(element)
                 index = text3.find(element)
-                # TODO: BRENDAN, ADD CHECK TO SEE IF PII ALREADY IN DATABASE (IF SO, USE STORED TOKEN INSTEAD OF MAKING NEW ONE)
-                str = uuid.uuid4() 
+                #CHECK TO SEE IF PII ALREADY IN DATABASE (IF SO, USE STORED TOKEN INSTEAD OF MAKING NEW ONE)
+                if(db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE PII_VALUE = " + element)):
+                    str = db_cursor_def.execute("SELECT Token FROM PII_TOKEN_XREF WHERE PII_VALUE = " + element)
+                else:
+                    str = uuid.uuid4() 
                 temp.append(str.hex)
                 text3 = text3[:index] + char + "-" + str.hex + text3[index+len(element):]
                 token_list.append(temp)
@@ -510,8 +513,10 @@ def remove(text):
     with open(os.path.join(dir_path, 'updatedFiles\\tokenized_output.txt'), 'w') as file:
         file.write(text3)
 
-    # TODO: BRENDAN, LOOP THROUGH LIST AND UPLOAD ALL TOKENS TO DATABASE HERE
-
+    #LOOP THROUGH LIST AND UPLOAD ALL TOKENS TO DATABASE HERE
+    
+    for token in token_list:
+        db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES(%s, %s, %s)", (token[2], token[1], token[0]))
     return (text, token_list)
 
 
@@ -553,6 +558,7 @@ def database_creation():
                                         schema ='PUBLIC',
                                         autocommit=True)         
 
+    global db_cursor_def
     db_cursor_def = con_def.cursor()
 
     db_cursor_def.execute("CREATE WAREHOUSE IF NOT EXISTS pii_warehouse")
@@ -581,7 +587,7 @@ def database_creation():
     #TODO when PII is matched to Token, add functionality to store and remove from database
 
     db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES('c2783f59-743e-403c-beac-21cb67076292','Rick Owens', 'N')")
-
+    
     db_cursor_def.close()
 
 
