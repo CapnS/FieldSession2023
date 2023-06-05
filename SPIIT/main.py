@@ -1,4 +1,4 @@
-#import snowflake
+import snowflake
 import sys
 from nltk import tokenize
 import nltk
@@ -110,7 +110,7 @@ def remove(text):
                 text4 = text4.replace(i, "")
 
     # detect passport number and replace it with xxx
-    # only new passports have a format that unique from other 
+    # only new passports have a format that is unique from other piis 
     for word in text4.split():
         #edge case: make sure that there is no punctuation after the passport number; otherwise, it will not be detected
         if word[-1] in punc_list:
@@ -133,10 +133,14 @@ def remove(text):
             # append ssn to ssn_list
             if word not in ssn_list:
                 ssn_list.append(word)
-                x = 'x';
-                for n in range (len(word)-1):
-                    x = x + 'x'; 
-                text = text.replace(word, x)
+                start_ind = text.find(word)
+                x = ''         
+                for char in word:
+                    if char != '-':
+                        x = x + 'x'
+                    else: 
+                        x = x + '-'                       
+            text = text.replace(word,x)
 
         
     new_list = []
@@ -161,27 +165,30 @@ def remove(text):
             if not text[end_ind].isspace() and text[end_ind] not in punc_list:
                 end_ind = text.find(" ", end_ind)
                 temp = text[start_ind:end_ind]
-            
-            #print("Here is a substring ")
+                
             # Find the previous word and check if it is numeric to identify if it is part of the address 
             previous_word = text.rfind(" ", 0, start_ind-1)
-            #print(previous_word)
+
             # Extract the previous word using string slicing
             p_word = text[previous_word + 1:start_ind-1]
-            isDigit = True;
+            isDigit = False
             for x in p_word:
-                if x.isdigit() == False:
-                    isDigit == False;
+                if x.isdigit() == True:
+                    isDigit == True
             # if it is numeric combine with the rest of address 
             if isDigit and len(p_word) < 5:
-                start_ind = previous_word
+                start_ind = previous_word + 1
                 temp = p_word + " " + temp 
+
             address_list.append(temp) if temp not in address_list else print()
             #mask it with xxx for testing purposes 
-            x = 'x';
-            for n in range (len(temp)-1):
-                x = x + 'x';             
-            text = text[:start_ind] + x + text[start_ind+len(x):]
+            x = ''          
+            for char in temp:
+                if char != ' ':
+                    x = x + 'x'
+                else: 
+                    x = x + ' '                      
+            text = text[:start_ind ] + x + text[start_ind+len(x):]
     #print(text)
 
         
@@ -199,18 +206,23 @@ def remove(text):
         if entity_label == "PER":
             # check if the word is complete since the model sometimes tempts to grab just the beginning of the name 
             temp = entity_group["word"]
-            start_ind = text.find(temp)
+            start_ind = text.find(temp)           
             end_ind = start_ind + len(temp)
-            if not text[end_ind].isspace() and text[end_ind] not in punc_list:
-                end_ind = text.find(" ", end_ind)
-                temp = text[start_ind:end_ind]
-            if temp not in people_list:
-                people_list.append(temp)
-                #mask it with xxx for testing purposes 
-                x = 'x';
-                for n in range (len(temp)-1):
-                    x = x + 'x';             
-                text = text[:start_ind] + x + text[start_ind+len(x):]
+            if end_ind < len(text):
+                if not text[end_ind].isspace() and text[end_ind] not in punc_list:
+                    end_ind = text.find(" ", end_ind)
+                    temp = text[start_ind:end_ind]
+                if temp not in people_list:
+                    people_list.append(temp)
+                    #mask it with xxx for testing purposes                    
+                    x = ''         
+                    for char in temp:
+                        if char != ' ':
+                            x = x + 'x'
+                        else: 
+                            x = x + ' '                       
+                    text = text[:start_ind] + x + text[start_ind+len(x):]
+                    
         elif entity_label == "MISC":
             # check if the word is complete since the model sometimes tempts to grab just the beginning of the name 
             temp = entity_group["word"]
@@ -222,15 +234,20 @@ def remove(text):
                 temp = text[start_ind:end_ind]
             if temp not in undefined:
                 undefined.append(temp)
-                #mask it with xxx for testing purposes 
-                x = 'x';
-                for n in range (len(temp)-1):
-                    x = x + 'x';             
-                text = text[:start_ind] + x + text[start_ind+len(x):]
+
         elif entity_label == "ORG":
             temp = entity_group["word"]
             if temp not in org_list:
                 org_list.append(temp)
+            start_ind = text.find(temp)
+            x = ''         
+            for char in temp:
+                if char != ' ':
+                    x = x + 'x'
+                else: 
+                    x = x + ' '                       
+            text = text[:start_ind] + x + text[start_ind+len(x):]
+                
     
     
     # this is a second layer that checks if the names that were detected are in the dataset of 10 000 common names that we have created       
@@ -245,8 +262,22 @@ def remove(text):
         first = word.split()
         if first[0] in names_dataset:
             undefined.remove(word)
-            people_list.append(word)            
-            
+            people_list.append(word)
+        if word.isdigit() == False:
+            undefined.remove(word)
+
+    for word in undefined:
+        start_ind = text.find(word)
+        #mask it with xxx for testing purposes                    
+        x = ''         
+        for char in word:
+            if char != ' ':
+                x = x + 'x'
+            else: 
+                x = x + ' '                       
+        text = text[:start_ind] + x + text[start_ind+len(x):]
+        
+             
     # create temporary new lists that will hold the char associated with pii and a list of all piis 
     # then append each list in one nested list all_pii 
     # so we end up getting something like this:
@@ -272,18 +303,6 @@ def remove(text):
     new_list.append(undefined)      
     all_pii.append(new_list)
 
-    # mask all the pii detected by nlp with xxx for testing purposes 
-    for entity_group in output:
-    
-        if text.find(entity_group["word"]) > -1:
-            temp = entity_group["word"]
-            for word in temp.split():       
-                if text.find(word) > -1:
-                    index = text.find(word)
-                    x = 'x';
-                    for n in range (len(word)-1):
-                        x = x + 'x';             
-                    text = text[:index] + x + text[index+len(x):]
                 
     # detect dl and replace it with xxx
     for word in text.split():
@@ -299,12 +318,7 @@ def remove(text):
                     for n in range (len(word)-1):
                         x = x + 'x'; 
                     text = text.replace(word, x)
-
-            
-    new_list = []
-    new_list.append("D")
-    new_list.append(dl_list)
-    all_pii.append(new_list)        
+    
             
                 
                 
@@ -333,23 +347,29 @@ def remove(text):
     clean_undetected_list = [] 
 
     for sentence in new_list:
-        #print(sentence)
+        for i in sentence:
+            if i in punc_list:
+                if i == '.' or i == '-':
+                    sentence = sentence.replace(i, " ")
+                else:
+                    sentence = sentence.replace(i, "")
         sentence_list = []
         #check if there is only one type of the document mentioned in the sentence 
         #if there id more than one, the pii will go into undefined list
-        one_type = 0;
+        one_type = 0
+        character = 'A'
         # assign char depending on the type of pii
         for word in id_words:
             if word.lower() in sentence.lower():
                 one_type = one_type + 1
-                char = "B"
+                character = 'B'
         for word in dl_words:
             if word.lower() in sentence.lower():
                 one_type = one_type + 1
-                char = "D"
+                character = 'D'
         #trace the the numeric pii 
         for word in sentence.split():
-            isDigit = False;
+            isDigit = False
             for char in word:
                 if char.isdigit() == True:
                     isDigit = True; 
@@ -357,25 +377,38 @@ def remove(text):
                 # sometimes it will grab pii with punctuation, so we need to make sure to get rid of it before passing into the list 
                 if word[-1] in punc_list:
                     word = word[:-1]
-                if one_type == 1:
-                    clean_undetected_list.append(char)
-                    sentence_list.append(word)
+                if one_type == 1 and character == 'D':
+                    if word not in dl_list:
+                        dl_list.append(word)
+                        start_ind = text.find(word)
+                        x = ''
+                        for char in word:
+                            if char != '-':
+                                x = x + 'x'
+                            else: 
+                                x = x + '-'                       
+                    text = text.replace(word,x)
                 else:
                     if word not in undefined:
                         undefined.append(word)
                 #replace pii with xxx
-                if text.find(word) > -1:
-                    index = text.find(word)
-                    x = 'x';
-                    for n in range (len(word)-1):
-                        x = x + 'x';             
-                    text = text[:index] + x + text[index+len(x):]
+                #if text.find(word) > -1:
+                #    index = text.find(word)
+                #    x = 'x';
+                #    for n in range (len(word)-1):
+                #        x = x + 'x';             
+                #    text = text[:index] + x + text[index+len(x):]
         if len(sentence_list) > 0 :
             clean_undetected_list.append(sentence_list)
     #if len(clean_undetected_list) > 0:
         #all_pii.append(clean_undetected_list)
 
 
+    new_list = []
+    new_list.append("D")
+    new_list.append(dl_list)
+    all_pii.append(new_list)    
+    
 
     # detect phone numbers and replace them with xxx       
     for match in phonenumbers.PhoneNumberMatcher(text, "US"):
@@ -453,6 +486,7 @@ def remove(text):
     new_list.append(cc_list)
     all_pii.append(new_list)
 
+
     #second nlp that we are using for dates 
     nlp = spacy.load("en_core_web_sm")
     doc = nlp(text)            
@@ -479,7 +513,6 @@ def remove(text):
     new_list = []
     new_list.append("D")
     new_list.append(date_list)
-    print(date_list)
     # We have to figure out what to do with dates; we will probably just have to manually check if they match the format of the DOB because we don't 
     # need to tokenize all the dates 
 
@@ -516,7 +549,7 @@ def remove(text):
     # Writing to File
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(dir_path, 'updatedFiles\\tokenized_output.txt'), 'w') as file:
-        file.write(text3)
+       file.write(text3)
 
     #LOOP THROUGH LIST AND UPLOAD ALL TOKENS TO DATABASE HERE
     
@@ -556,7 +589,7 @@ def database_creation():
     SNOWFLAKE_PASSWORD = os.getenv("SNOWFLAKE_PASSWORD")
 
     con_def = snowflake.connector.connect(user='BRENDANMORONEY',
-                                        account='ydpcciy-xn91624',
+                                       account='ydpcciy-xn91624',
                                         password =SNOWFLAKE_PASSWORD,
                                         database='PII_TOKENIZATION',        
                                         schema ='PUBLIC',
@@ -591,7 +624,7 @@ def database_creation():
     #Practice insert
     #TODO when PII is matched to Token, add functionality to store and remove from database
 
-    #db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES('c2783f59-743e-403c-beac-21cb67076292','Rick Owens', 'N')")
+    db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES('c2783f59-743e-403c-beac-21cb67076292','Rick Owens', 'N')")
     
 
 
