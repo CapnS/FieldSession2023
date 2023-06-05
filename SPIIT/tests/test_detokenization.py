@@ -46,7 +46,7 @@ class TestDetectionMethods(unittest.TestCase):
         Terms:
         Jeffery App -> E91247812 -> 125-25-2623
 
-        Maybe DL-9123471023
+        Maybe DL-9123471023.
         Jeffery App -> E91247812 -> 125-25-2623
         Now for some terms of the document, these passports must be used by the same people they are named for, no illegal
         passport usage. In order to make sure of this, we have put chips in them that track with specific drivers licenses. The
@@ -57,11 +57,10 @@ class TestDetectionMethods(unittest.TestCase):
         1241395133, DL-9123471023
         '''
         tokenized = remove(text)[2]
+        print("\nORIGINAL:\n", text)
+        print("\nTOKENIZED:\n", tokenized)
         replaced = replace(tokenized)
-        print("ORIGINAL\n")
-        print(text)
-        print("\nDETOKENIZED\n")
-        print(replaced)
+        print("\nDETOKENIZED:\n", replaced)
         
         self.assertEqual(replaced, text)
 
