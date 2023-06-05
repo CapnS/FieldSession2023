@@ -620,11 +620,8 @@ def database_creation():
     db_cursor_def.execute("""CREATE OR REPLACE TABLE PII_TOKENIZATION.PUBLIC.log 
     (time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, user TEXT, document TEXT, PII_type TEXT, override 
     boolean)""")
-                        
-    #Practice insert
-    #TODO when PII is matched to Token, add functionality to store and remove from database
 
-    db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES('c2783f59-743e-403c-beac-21cb67076292','Rick Owens', 'N')")
+    
     
 
 
@@ -632,4 +629,5 @@ database_creation()
 if __name__ == "__main__":
 
     remove(text) if sys.argv[2] == "1" else replace(text)
-
+    
+db_cursor_def.close()

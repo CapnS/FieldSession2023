@@ -23,10 +23,12 @@
     "langchain": "0.0.55",
     "lucide-react": "^0.125.0",
     "next": "^13.4.4",
+    "nookies": "^2.5.2",
     "pdf-parse": "1.1.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-markdown": "^8.0.5",
+    "react-modal": "^3.16.1",
     "tailwind-merge": "^1.10.0"
   },
   "devDependencies": {
