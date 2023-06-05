@@ -612,13 +612,13 @@ def database_creation():
     
     db_cursor_def.execute("""CREATE OR REPLACE TABLE 
     PII_TOKENIZATION.PUBLIC.PII_Token_XREF (Token TEXT, PII_VALUE 
-    TEXT,PII_TYPE VARCHAR(16777216), rec_created_date TIMESTAMP, 
-    user_added TEXT, updated_date TIMESTAMP, PRIMARY KEY(Token))""")
+    TEXT,PII_TYPE VARCHAR(16777216), rec_created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    user_added TEXT, updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(Token))""")
 
     #Creates log table
 
     db_cursor_def.execute("""CREATE OR REPLACE TABLE PII_TOKENIZATION.PUBLIC.log 
-    (time TIMESTAMP, user TEXT, document TEXT, PII_type TEXT, override 
+    (time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, user TEXT, document TEXT, PII_type TEXT, override 
     boolean)""")
                         
     #Practice insert
