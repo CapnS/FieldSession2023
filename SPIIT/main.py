@@ -559,7 +559,7 @@ def remove(text):
 
     # Writing to File
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(dir_path, 'updatedFiles\\tokenized_output.txt'), 'w') as file:
+    with open(os.path.join(dir_path, 'updatedFiles/tokenized_output.txt'), 'w') as file:
        file.write(text3)
 
     #LOOP THROUGH LIST AND UPLOAD ALL TOKENS TO DATABASE HERE
@@ -590,7 +590,7 @@ def replace(text):
 
     # Writing to File
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(dir_path, 'updatedFiles\\detokenizedoutput.txt'), 'w') as file:
+    with open(os.path.join(dir_path, 'updatedFiles/detokenized_output.txt'), 'w') as file:
         file.write(new_text)
     return new_text
 
