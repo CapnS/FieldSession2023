@@ -6,6 +6,12 @@ import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import LoadingDots from '@/components/ui/LoadingDots';
 import { Document } from 'langchain/document';
+
+//SPIIT team imports
+import { GetServerSideProps } from 'next';
+import { parseCookies } from 'nookies';
+import WarningPopUp from 'pages/warningPopUp';
+
 import {
   Accordion,
   AccordionContent,
@@ -37,8 +43,21 @@ export default function Home() {
   const messageListRef = useRef<HTMLDivElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
+  const [warningVisible, setWarningVisible] = useState(false);
+  //CREATE WARNING POP UP
+  //CREATE WARNING POP UP
   useEffect(() => {
-    textAreaRef.current?.focus();
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === '/') {
+        setWarningVisible(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyPress);
+
+    // Clean up event listener on component unmount
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
   }, []);
 
   //handle form submission
@@ -123,6 +142,7 @@ export default function Home() {
   return (
     <>
       <Layout>
+        <WarningPopUp isOpen={warningVisible} onClose={() => setWarningVisible(false)} />
         <div className="mx-auto flex flex-col gap-4">
           <h1 className="text-2xl font-bold leading-[1.1] tracking-tighter text-center">
             Chat With Your Legal Docs
@@ -268,4 +288,25 @@ export default function Home() {
       </Layout>
     </>
   );
+
 }
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  // Parse cookies from the incoming server request
+  const cookies = parseCookies(context);
+
+  // check the users login status using the isLoggedIN cookie
+  if (cookies.isLoggedIn !== 'true') {
+    // Else, redirect to '/login'
+    return {
+      redirect: {
+        destination: '/logIn',
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {},
+  };
+};
