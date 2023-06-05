@@ -31,7 +31,39 @@ class TestDetectionMethods(unittest.TestCase):
         replaced = replace(tokenized)
         #print(replaced)
         self.assertEqual(replaced, text)
+
+    def test_multiple_replace(self):
+        text = '''Notes:
+        these passports have specific passport numbers for each and they tie into specific peoples ids:
+        Jeffery App -> E91247812 -> 125-25-2623
+        That was for one, i will no list all of the other ones.
+        Jacob Smith -> A12420291 -> 251-51-2513
+        Blake Jones -> J01417521 -> 824-12-6234
+        Jill Withers -> O92942124 -> 591-62-1241
+        And finally we have the last passport's information:
+        John Johnson -> K85129283 -> 912-15-7475
+        Blake Jones -> J01417521 -> 824-12-6234
+        Terms:
+        Jeffery App -> E91247812 -> 125-25-2623
+
+        Maybe DL-9123471023
+        Jeffery App -> E91247812 -> 125-25-2623
+        Now for some terms of the document, these passports must be used by the same people they are named for, no illegal
+        passport usage. In order to make sure of this, we have put chips in them that track with specific drivers licenses. The
+        number for these licenses is as follows and in order of how I listed them before: 175819278, J1323633, E912848,
+        1241395133, DL-9123471023
+        Blake Jones -> J01417521 -> 824-12-6234
+        The number for these licenses is as follows and in order of how I listed them before: 175819278, J1323633, E912848,
+        1241395133, DL-9123471023
+        '''
+        tokenized = remove(text)[2]
+        replaced = replace(tokenized)
+        print("ORIGINAL\n")
+        print(text)
+        print("\nDETOKENIZED\n")
+        print(replaced)
         
+        self.assertEqual(replaced, text)
 
 if __name__ == '__main__':
     unittest.main()

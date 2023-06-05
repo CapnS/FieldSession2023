@@ -541,7 +541,7 @@ def remove(text):
                 
                 temp.append(token)
                 
-                text3 = text3[:index] + char + "-" + token + text3[index+len(element):]
+                text3 = text3[:index] + char + "{<" + token + ">}" + text3[index+len(element):]
                 token_list.append(temp)
                 
         
@@ -569,11 +569,10 @@ def replace(text):
     # Don't know which is faster, but since we shouldn't expect many tokens to be in the response (which is where we are replacing) it is probably
     # faster to only search for the tokens that are actually necessary 
     new_text = text
-    print(text)
     for i, word in enumerate(text.split(' ')):
-        if re.match(r'[A-Z]-[a-z0-9]{32}', word):
-            token = word[2:34]
-            to_replace = word[:34]
+        if re.match(r'[A-Z]{<[a-z0-9]{32}>}', word):
+            token = word[3:35]
+            to_replace = word[:37]
             pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
             index = new_text.find(to_replace)
             new_text = new_text[:index] + pii + new_text[index+len(to_replace):]
@@ -582,7 +581,6 @@ def replace(text):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(dir_path, 'updatedFiles\\detokenizedoutput.txt'), 'w') as file:
         file.write(new_text)
-    print(new_text)
     return new_text
 
 
