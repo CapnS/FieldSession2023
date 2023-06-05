@@ -403,6 +403,9 @@ def remove(text):
     #if len(clean_undetected_list) > 0:
         #all_pii.append(clean_undetected_list)
 
+    for pii in undefined:
+        if pii in dl_list:
+            undefined.remove(pii)
 
     new_list = []
     new_list.append("D")
@@ -520,7 +523,7 @@ def remove(text):
     print(all_pii)
 
     token_list = []
-
+    seen = []
     #sub the pii with uuid to pass it to chat gpt
     for pii_list in all_pii:
         if len(pii_list[1]) != 0:
@@ -565,19 +568,21 @@ def replace(text):
     # Here we need to decide whether we should get a dict of all token-> PII or just look through the database every time we hit a token in the text
     # Don't know which is faster, but since we shouldn't expect many tokens to be in the response (which is where we are replacing) it is probably
     # faster to only search for the tokens that are actually necessary 
-    new_text = text.split(' ')
+    new_text = text
+    print(text)
     for i, word in enumerate(text.split(' ')):
         if re.match(r'[A-Z]-[a-z0-9]{32}', word):
             token = word[2:34]
+            to_replace = word[:34]
             pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
-            new_text[i] = pii
-    new_text = ' '.join(new_text)
+            index = new_text.find(to_replace)
+            new_text = new_text[:index] + pii + new_text[index+len(to_replace):]
 
     # Writing to File
     dir_path = os.path.dirname(os.path.realpath(__file__))
     with open(os.path.join(dir_path, 'updatedFiles\\detokenizedoutput.txt'), 'w') as file:
         file.write(new_text)
-
+    print(new_text)
     return new_text
 
 
@@ -627,7 +632,5 @@ def database_creation():
 
 database_creation()
 if __name__ == "__main__":
-
     remove(text) if sys.argv[2] == "1" else replace(text)
-    
-db_cursor_def.close()
+    #db_cursor_def.close()

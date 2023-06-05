@@ -27,9 +27,9 @@ class TestDetectionMethods(unittest.TestCase):
         Each of these individuals brings their unique passions and interests to their neighborhoods, fostering a sense of community and connection. Whether it's photography, gardening, collecting, or baking, the residents of these homes are always eager to share their joy and build new connections with like-minded individuals.
         '''
         tokenized = remove(text)[2]
-        print(tokenized)
+        #print(tokenized)
         replaced = replace(tokenized)
-        print(replaced)
+        #print(replaced)
         self.assertEqual(replaced, text)
         
 

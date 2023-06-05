@@ -43,7 +43,7 @@ class TestTokenizationMethods(unittest.TestCase):
                 self.assertTrue(token[2] not in tokenDict.values())
                 tokenDict.update({token[1]:token[2]})
             else:
-                print(token[1], token[2], tokenDict[token[1]])
+                print("TEST_CONSISTENC", token[1], token[2], tokenDict[token[1]])
                 self.assertTrue(tokenDict[token[1]] == token[2])
     
     def test_consistency_across_runs(self):
@@ -64,16 +64,15 @@ class TestTokenizationMethods(unittest.TestCase):
             tokenDict.update({token[1]: token[2]})
         tokenList2 = tokenizePII(text)
         for token in tokenList2:
-            print(token[1],token[2],tokenDict[token[1]])
             self.assertTrue(tokenDict[token[1]] == token[2])
         tokenList3 = tokenizePII(text)
         for token in tokenList3:
-            print(token[1],token[2],tokenDict[token[1]])
             self.assertTrue(tokenDict[token[1]] == token[2])
 
-    
+    '''
+    This was used to make sure no 2 tokens were given out, but it is unneccesary and broken now
     def test_randomness(self):
-        text = '''List of People and Their SSNs:
+        text = """List of People and Their SSNs:
 
         Jackson Stein: 124-53-1345
         Max Johnson: 156-24-1582
@@ -118,14 +117,14 @@ class TestTokenizationMethods(unittest.TestCase):
         Max Johnson: Chutes and Ladders
         Jim Jimmy: Sorry
         Sean Goldman: Settlers of Catan
-        '''
+        """
         allTokens = []
-        for i in range(2):
+        for i in range(100):
             tokenList = tokenizePII(text)
             for token in tokenList:
                 self.assertTrue(token[2] not in allTokens)
                 allTokens.append(token[2])
-        
+    '''
 
 
 
