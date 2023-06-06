@@ -64,5 +64,60 @@ class TestDetectionMethods(unittest.TestCase):
         
         self.assertEqual(replaced, text)
 
+    def test_detokenization2(self):
+        text = """List of People and Their SSNs:
+
+        Jackson Stein: 124-53-1345
+        Max Johnson: 156-24-1582
+        Jim Jimmy: 982-63-6324
+        Sean Goldman: 609-15-6314
+
+
+        List of Those People and Their Favorite Ice Cream:
+
+        Jackson Stein: Chocolate
+        Max Johnson: Vanilla
+        Jim Jimmy: Strawberry
+        Sean Goldman: Rocky Road
+
+
+        List of Those People and Their Email Addresses:
+
+        Jackson Stein: jstein@gmail.com
+        Max Johnson: maxwjohnson@yahoo.com
+        Jim Jimmy: jimster01@gmail.com
+        Sean Goldman: seangold@hotmail.com
+
+
+        List of Those People and Their Hair Color:
+
+        Jackson Stein: Brown
+        Max Johnson: Brown
+        Jim Jimmy: Blonde
+        Sean Goldman: Red
+
+
+        List of Those People and Their Home Address:
+
+        Jackson Stein: 8190 Elmora Street
+        Max Johnson: 1020 Illinois St.
+        Jim Jimmy: 834 Jim blvd.
+        Sean Goldman: 5 Waverly Ct.
+
+        List of Those People and Their Favorite Board Game:
+
+        Jackson Stein: Monopoly
+        Max Johnson: Chutes and Ladders
+        Jim Jimmy: Sorry
+        Sean Goldman: Settlers of Catan
+        """
+
+        tokenized = remove(text)[2]
+        #print("\nORIGINAL:\n", text)
+        #print("\nTOKENIZED:\n", tokenized)
+        replaced = replace(tokenized)
+        # print("\nDETOKENIZED:\n", replaced)
+        self.assertEqual(replaced, text)
+        
 if __name__ == '__main__':
     unittest.main()

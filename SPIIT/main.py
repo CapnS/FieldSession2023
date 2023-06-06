@@ -530,32 +530,23 @@ def remove(text):
             char = pii_list[0][0]
             
             for element in pii_list[1]:
-                #print(element)
+                if not element:
+                    continue
                 temp = []
                 temp.append(char)
                 temp.append(element)
-                #print("temp")
-                #print(temp)
                 #CHECK TO SEE IF PII ALREADY IN DATABASE (IF SO, USE STORED TOKEN INSTEAD OF MAKING NEW ONE)
                 if(db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE PII_VALUE = %s", element).fetchone()):
                     token = db_cursor_def.execute("SELECT Token FROM PII_TOKEN_XREF WHERE PII_VALUE = %s", element).fetchone()[0]
                 else:
                     token = uuid.uuid4().hex
-                
                 temp.append(token)
                 token_list.append(temp)
-                #print("token")
-                #print(token_list)
-                
                 
                 while element in text3:
                     index = text3.find(element)
                     text3 = text3[:index] + char + "{<" + token + ">}" + text3[index+len(element):]
-                
-        
-    #print(token_list)            
-    #print("String with UUID pii: ")
-    #print(text3)
+  
 
     # Writing to File
     dir_path = os.path.dirname(os.path.realpath(__file__))
