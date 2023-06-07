@@ -6,6 +6,7 @@ import Image from 'next/image';
 import ReactMarkdown from 'react-markdown';
 import LoadingDots from '@/components/ui/LoadingDots';
 import { Document } from 'langchain/document';
+import http from 'http';
 
 //SPIIT team imports
 import { GetServerSideProps } from 'next';
@@ -73,6 +74,33 @@ export default function Home() {
 
     const question = query.trim();
 
+    const options1 = {
+      hostname: '127.0.0.1',
+      port: 5000,
+      path: '/remove', // Replace with your API endpoint
+      method: 'GET',
+      headers: {
+        'Content-Type': 'text/plain', // Set the header to "text"
+        'text': question // Set the text to be replaced
+      }
+    };
+  
+    const req1 = http.request(options1, (res) => {
+      let response = '';
+      res.on('data', (chunk) => {
+        response += chunk;
+      });
+      res.on('end', () => {
+        console.log(response); // Handle the response data here
+        const question = response;
+      });
+    });
+    req1.on('error', (error) => {
+      console.error('Error:', error);
+    });
+  
+    req1.end();
+
     setMessageState((state) => ({
       ...state,
       messages: [
@@ -100,6 +128,33 @@ export default function Home() {
       });
       const data = await response.json();
       console.log('data', data);
+
+      const options = {
+        hostname: '127.0.0.1',
+        port: 5000,
+        path: '/replace', // Replace with your API endpoint
+        method: 'GET',
+        headers: {
+          'Content-Type': 'text/plain', // Set the header to "text"
+          'text': data.text // Set the text to be replaced
+        }
+      };
+    
+      const req = http.request(options, (res) => {
+        let response = '';
+        res.on('data', (chunk) => {
+          response += chunk;
+        });
+        res.on('end', () => {
+          console.log(response); // Handle the response data here
+          data.text = response;
+        });
+      });
+      req.on('error', (error) => {
+        console.error('Error:', error);
+      });
+    
+      req.end();
 
       if (data.error) {
         setError(data.error);

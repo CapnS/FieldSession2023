@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import os
 from flask import Flask
 from flask import request
+from flask_cors import CORS
 
 
 
@@ -538,7 +539,7 @@ def remove(text):
                 token_list.append(temp)
                 
                 while element in text3:
-                    index = re.search(r"\b" + re.escape(element) + r"\b", text3)
+                    index = re.search(re.escape(element), text3)
                     if index is not None:
                         index = index.start()
                         text3 = text3[:index] + char + "<<<" + token + ">>>" + text3[index + len(element):]
@@ -552,7 +553,7 @@ def remove(text):
     #   file.write(text3)
 
     #LOOP THROUGH LIST AND UPLOAD ALL TOKENS TO DATABASE HERE
-    
+    print(token_list)
     for token in token_list:
         if not(db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE PII_VALUE = %s", element).fetchall()):    
             db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES(%s, %s, %s)", (token[2], token[1], token[0]))
@@ -571,7 +572,13 @@ def replace(text):
         if match:
             token = word[match.start()+4:match.end()-3]
             to_replace = word[match.start():match.end()]
-            pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
+            print(token, to_replace)
+            try:
+                pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
+            except:
+                print("Token not found in database")
+                continue
+            print(pii)
             index = new_text.find(to_replace)
             new_text = new_text[:index] + pii + new_text[index+len(to_replace):]
 
@@ -598,7 +605,7 @@ def database_creation():
 
     global db_cursor_def 
     db_cursor_def = con_def.cursor()
-
+    '''
     db_cursor_def.execute("CREATE WAREHOUSE IF NOT EXISTS pii_warehouse")
     db_cursor_def.execute("USE WAREHOUSE pii_warehouse")
 
@@ -611,36 +618,40 @@ def database_creation():
     #Creates table with PII_value, PII_type and ID
 
     
-    db_cursor_def.execute("""CREATE OR REPLACE TABLE 
+     db_cursor_def.execute("""CREATE TABLE IF NOT EXISTS
     PII_TOKENIZATION.PUBLIC.PII_Token_XREF (Token TEXT, PII_VALUE 
     TEXT,PII_TYPE VARCHAR(16777216), rec_created_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     user_added TEXT, updated_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY(Token))""")
 
     #Creates log table
 
-    db_cursor_def.execute("""CREATE OR REPLACE TABLE PII_TOKENIZATION.PUBLIC.log 
+    db_cursor_def.execute("""CREATE TABLE IF NOT EXISTS PII_TOKENIZATION.PUBLIC.log 
     (time TIMESTAMP DEFAULT CURRENT_TIMESTAMP, user TEXT, document TEXT, PII_type TEXT, override 
     boolean)""")
+    '''
+    
+    
 
-    
-    
 
 database_creation()
 
 app = Flask(__name__)
+CORS(app)
 @app.route("/replace")
 def replace_pii():
-    return replace(request.headers['text'])
+    print("Replacing", request.headers['text'])
+    replaced = replace(request.headers['text'])
+    print(replaced)
+    return replaced
 
 @app.route("/remove")
 def remove_pii():
-    return remove(request.headers['text'])[2]
+    print("Removing", request.headers['text'])
+    removed = remove(request.headers['text'])[2]
+    print(removed)
+    return removed
 
 @app.route("/")
 def hello():
     return "Hello, your api is running!"
 
-if __name__ == "__main__":
-    pass
-    #remove(text) if sys.argv[2] == "1" else replace(text)
-    #db_cursor_def.close()

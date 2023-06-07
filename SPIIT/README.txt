@@ -13,3 +13,8 @@ npm install nookies
 npm install react
 npm install react-modal
 npm audit fix
+
+Finally, you will have to change the way node parses pdfs like so:
+
+go to node_modules/pdf-parse/lib/pdf-parse.js and on line 23 change
+`text += item.str` to `text += item.str + ' '`
