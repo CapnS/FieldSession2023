@@ -11,6 +11,10 @@ from transformers import pipeline
 import snowflake.connector
 from dotenv import load_dotenv
 import os
+from flask import Flask
+from flask import request
+
+
 
 # N - Name 
 # A - Address 
@@ -621,8 +625,22 @@ def database_creation():
     
     
 
-
 database_creation()
+
+app = Flask(__name__)
+@app.route("/replace")
+def replace_pii():
+    return replace(request.headers['text'])
+
+@app.route("/remove")
+def remove_pii():
+    return remove(request.headers['text'])[2]
+
+@app.route("/")
+def hello():
+    return "Hello, your api is running!"
+
 if __name__ == "__main__":
-    remove(text) if sys.argv[2] == "1" else replace(text)
+    pass
+    #remove(text) if sys.argv[2] == "1" else replace(text)
     #db_cursor_def.close()

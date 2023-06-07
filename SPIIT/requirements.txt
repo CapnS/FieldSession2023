@@ -7,3 +7,4 @@ snowflake
 tensorflow
 snowflake-connector-python
 python-dotenv
+flask
