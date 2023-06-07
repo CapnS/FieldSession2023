@@ -72,10 +72,6 @@ def remove(text):
 
     pd.close()
 
-    #print(output)
-
-    #print("Original string: ")
-    #print(text)
     text3 = text
 
     #key words lists
@@ -156,8 +152,6 @@ def remove(text):
     #parts of the addresses sometimes wrongfully identified as names, so addresses needs to extracted first to avoid that 
     for entity_group in output:
         entity_label = entity_group["entity_group"] 
-        print(entity_group["entity_group"])
-        print(entity_group["word"])
         if entity_label == "LOC":
             temp = entity_group["word"]
             start_ind = text.find(temp)
@@ -189,7 +183,6 @@ def remove(text):
                 else: 
                     x = x + ' '                      
             text = text[:start_ind ] + x + text[start_ind+len(x):]
-    #print(text)
 
         
     new_list = []
@@ -496,7 +489,6 @@ def remove(text):
     
     # using spacy library to detect dates
     for entity in doc.ents:
-        #print(entity.label_ +": " + entity.text)
         if entity.label_ == "DATE":
             temp = entity.text
             for punct in punc_list:
@@ -510,9 +502,7 @@ def remove(text):
                     for n in range (len(word)-1):
                         x = x + 'x';             
                     text = text[:index] + x + text[index+len(x):]
-    #print()
-    #print("String with masked pii: ")
-    #print(text)
+
     new_list = []
     new_list.append("D")
     new_list.append(date_list)
@@ -547,7 +537,7 @@ def remove(text):
                     index = re.search(r"\b" + re.escape(element) + r"\b", text3)
                     if index is not None:
                         index = index.start()
-                        text3 = text3[:index] + char + "{<" + token + ">}" + text3[index + len(element):]
+                        text3 = text3[:index] + char + "<<<" + token + ">>>" + text3[index + len(element):]
                     else:
                         break
   
@@ -573,12 +563,10 @@ def replace(text):
     # faster to only search for the tokens that are actually necessary 
     new_text = text
     for i, word in enumerate(text.split(' ')):
-        match = re.search(r'[A-Z]{<[a-z0-9]{32}>}', word)
+        match = re.search(r'[A-Z]<<<[a-z0-9]{32}>>>', word)
         if match:
-            #print("Word:",word)
-            token = word[match.start()+3:match.end()-2]
+            token = word[match.start()+4:match.end()-3]
             to_replace = word[match.start():match.end()]
-            #print(token, to_replace)
             pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
             index = new_text.find(to_replace)
             new_text = new_text[:index] + pii + new_text[index+len(to_replace):]
