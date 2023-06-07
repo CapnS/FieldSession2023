@@ -156,8 +156,8 @@ def remove(text):
     #parts of the addresses sometimes wrongfully identified as names, so addresses needs to extracted first to avoid that 
     for entity_group in output:
         entity_label = entity_group["entity_group"] 
-        #print(entity_group["entity_group"])
-        #print(entity_group["word"])
+        print(entity_group["entity_group"])
+        print(entity_group["word"])
         if entity_label == "LOC":
             temp = entity_group["word"]
             start_ind = text.find(temp)
@@ -171,16 +171,16 @@ def remove(text):
 
             # Extract the previous word using string slicing
             p_word = text[previous_word + 1:start_ind-1]
-            isDigit = False
+            isDigit = True
             for x in p_word:
-                if x.isdigit() == True:
-                    isDigit == True
+                if x.isdigit() == False:
+                    isDigit == False
             # if it is numeric combine with the rest of address 
             if isDigit and len(p_word) < 5:
                 start_ind = previous_word + 1
                 temp = p_word + " " + temp 
-
-            address_list.append(temp) if temp not in address_list else print()
+            if temp not in address_list:
+                address_list.append(temp)
             #mask it with xxx for testing purposes 
             x = ''          
             for char in temp:
@@ -263,7 +263,7 @@ def remove(text):
         if first[0] in names_dataset:
             undefined.remove(word)
             people_list.append(word)
-        if word.isdigit() == False:
+        if word.isdigit() == False and word in undefined:
             undefined.remove(word)
 
     for word in undefined:
@@ -544,14 +544,18 @@ def remove(text):
                 token_list.append(temp)
                 
                 while element in text3:
-                    index = text3.find(element)
-                    text3 = text3[:index] + char + "{<" + token + ">}" + text3[index+len(element):]
+                    index = re.search(r"\b" + re.escape(element) + r"\b", text3)
+                    if index is not None:
+                        index = index.start()
+                        text3 = text3[:index] + char + "{<" + token + ">}" + text3[index + len(element):]
+                    else:
+                        break
   
 
     # Writing to File
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(dir_path, 'updatedFiles/tokenized_output.txt'), 'w') as file:
-       file.write(text3)
+    #dir_path = os.path.dirname(os.path.realpath(__file__))
+    #with open(os.path.join(dir_path, 'updatedFiles/tokenized_output.txt'), 'w') as file:
+    #   file.write(text3)
 
     #LOOP THROUGH LIST AND UPLOAD ALL TOKENS TO DATABASE HERE
     
@@ -580,9 +584,9 @@ def replace(text):
             new_text = new_text[:index] + pii + new_text[index+len(to_replace):]
 
     # Writing to File
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    with open(os.path.join(dir_path, 'updatedFiles/detokenized_output.txt'), 'w') as file:
-        file.write(new_text)
+    #dir_path = os.path.dirname(os.path.realpath(__file__))
+    #with open(os.path.join(dir_path, 'updatedFiles/detokenized_output.txt'), 'w') as file:
+    #    file.write(new_text)
     return new_text
 
 

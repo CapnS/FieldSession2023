@@ -69,7 +69,7 @@ class TestDetectionMethods(unittest.TestCase):
 
         Jackson Stein: 124-53-1345
         Max Johnson: 156-24-1582
-        Jim Jimmy: 982-63-6324
+        Jim Jimmy: 899-63-6324
         Sean Goldman: 609-15-6314
 
 
@@ -99,7 +99,7 @@ class TestDetectionMethods(unittest.TestCase):
 
         List of Those People and Their Home Address:
 
-        Jackson Stein: 8190 Elmora Street
+        Jackson Stein: 8190 Elmora Street.
         Max Johnson: 1020 Illinois St.
         Jim Jimmy: 834 Jim blvd.
         Sean Goldman: 5 Waverly Ct.
@@ -113,10 +113,10 @@ class TestDetectionMethods(unittest.TestCase):
         """
 
         tokenized = remove(text)[2]
-        #print("\nORIGINAL:\n", text)
-        #print("\nTOKENIZED:\n", tokenized)
+        print("\nORIGINAL:\n", text)
+        print("\nTOKENIZED:\n", tokenized)
         replaced = replace(tokenized)
-        # print("\nDETOKENIZED:\n", replaced)
+        print("\nDETOKENIZED:\n", replaced)
         self.assertEqual(replaced, text)
         
 if __name__ == '__main__':
