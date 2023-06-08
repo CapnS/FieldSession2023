@@ -29,6 +29,7 @@ from flask_cors import CORS
 # I - IP address 
 # C - CC
 # E - Email
+# L - Date
 
 
 
@@ -42,6 +43,7 @@ def remove(text):
     ner_model = "dslim/bert-base-NER"
 
     punc_list = '''!()[]{};*:'"\,<>./?_~-'''
+    date_pattern = ["(0[1-9]|[12][0-9]|3[01])(\/|-)(0[1-9]|1[1,2])(\/|-)(19|20)\d{2}","(0[1-9]|1[1,2])(\/|-)(0[1-9]|[12][0-9]|3[01])(\/|-)(19|20)\d{2}", "^(19|20)\d{2}\/(0[1-9]|1[1,2])\/(0[1-9]|[12][0-9]|3[01])$"]
     ssn_validate_pattern = "^(?!666|000|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0{4})\\d{4}$"
     email_validate_pattern = r"^\S+@\S+\.\S+$"
     ip_validate_pattern = "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
@@ -496,30 +498,51 @@ def remove(text):
     for entity in doc.ents:
         if entity.label_ == "DATE":
             temp = entity.text
-            for punct in punc_list:
-                if punct in temp:
-                    temp = temp.replace(punct, " ")
-            date_list.append(temp)
-            for word in temp.split():       
-                if text.find(word) > -1:
-                    index = text.find(word)
-                    x = 'x';
-                    for n in range (len(word)-1):
-                        x = x + 'x';             
-                    text = text[:index] + x + text[index+len(x):]
+            #for punct in punc_list:
+            #    if punct in temp:
+            #        temp = temp.replace(punct, " ")
+            # nlp considers anything assosiated with time as a date: yesterday, a year ago, etc.
+            # so we should only extract elements that have some kind of numeric val 
+            isDigit = False
+            for x in temp:
+                if x.isdigit() :
+                   isDigit = True;    
+            if isDigit == True:  
+                date_list.append(temp)
+                for word in temp.split():       
+                    if text.find(word) > -1:
+                        index = text.find(word)
+                        x = 'x';
+                        for n in range (len(word)-1):
+                            x = x + 'x';             
+                        text = text[:index] + x + text[index+len(x):]
+    for word in text3.split():
+        #edge case: make sure that there is no punctuation after the 
+        if word[-1] in punc_list:
+            word = word[:-1]
+        for format in date_pattern:
+            if (re.match(format, word)):
+            # append date 
+                if word not in date_list:
+                    date_list.append(word)
+                
 
     new_list = []
-    new_list.append("D")
+    new_list.append("L")
     new_list.append(date_list)
+    
+    
+    
     # We have to figure out what to do with dates; we will probably just have to manually check if they match the format of the DOB because we don't 
     # need to tokenize all the dates 
 
-    #all_pii.append(new_list)
+    all_pii.append(new_list)
     print(all_pii)
 
     token_list = []
     seen = []
     #sub the pii with uuid to pass it to chat gpt
+
     for pii_list in all_pii:
         if len(pii_list[1]) != 0:
             char = pii_list[0][0]
@@ -538,11 +561,13 @@ def remove(text):
                 temp.append(token)
                 token_list.append(temp)
                 
+                
+                
                 while element in text3:
-                    index = re.search(re.escape(element), text3)
+                    index = re.search(r"\b" + re.escape(element) + r"\b", text3)
                     if index is not None:
                         index = index.start()
-                        text3 = text3[:index] + char + "<<<" + token + ">>>" + text3[index + len(element):]
+                        text3 = text3[:index] + char + "{<" + token + ">}" + text3[index + len(element):]
                     else:
                         break
   
@@ -568,19 +593,16 @@ def replace(text):
     # faster to only search for the tokens that are actually necessary 
     new_text = text
     for i, word in enumerate(text.split(' ')):
-        match = re.search(r'[A-Z]<<<[a-z0-9]{32}>>>', word)
+        match = re.search(r'[A-Z]{<[a-z0-9]{32}>}', word)
         if match:
-            token = word[match.start()+4:match.end()-3]
+            #print("Word:",word)
+            token = word[match.start()+3:match.end()-2]
             to_replace = word[match.start():match.end()]
-            print(token, to_replace)
-            try:
-                pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
-            except:
-                print("Token not found in database")
-                continue
-            print(pii)
+            #print(token, to_replace)
+            pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
             index = new_text.find(to_replace)
             new_text = new_text[:index] + pii + new_text[index+len(to_replace):]
+
 
     # Writing to File
     #dir_path = os.path.dirname(os.path.realpath(__file__))
