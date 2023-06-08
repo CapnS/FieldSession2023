@@ -609,7 +609,7 @@ def remove(text):
                 token_list.append(temp)
                 
                 
-                
+                # While the pii is still in the text, keep replacing it with the token
                 while element in text3:
                     index = re.search(re.escape(element), text3)
                     if index is not None:
@@ -635,23 +635,21 @@ def remove(text):
     
 
 def replace(text):
-    # Here we need to decide whether we should get a dict of all token-> PII or just look through the database every time we hit a token in the text
-    # Don't know which is faster, but since we shouldn't expect many tokens to be in the response (which is where we are replacing) it is probably
-    # faster to only search for the tokens that are actually necessary 
-    punc_list = '''!()[]{};*:'"\,<>./?_~-'''
     new_text = text
-    for i, word in enumerate(text.split(' ')):
+    for word in text.split(' '):
+        # search for our token in the word
         match = re.search(r'[A-Z]<<<[a-z0-9]{32}>>>', word)
         if match:
-            #print("Word:",word)
+            # if there is a match, single out the token and the actual part of the word to replace
             token = word[match.start()+4:match.end()-3]
             to_replace = word[match.start():match.end()]
-            #print(token, to_replace)
+            #if it's found in the database, set pii to that value, else continue
             try:
                 pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
             except:
                 print("Token not found in database.")
                 continue
+            # Find the token in the text and replace it with the pii
             index = new_text.find(to_replace)
             new_text = new_text[:index] + pii + new_text[index+len(to_replace):]
 
@@ -709,8 +707,12 @@ def database_creation():
 
 database_creation()
 
+# This code runs the api and also prints out what is going on for debugging and demo purposes
 app = Flask(__name__)
+# This allows our api to be used by another webpage which is necessary for our use case
 CORS(app)
+
+# Replace API route
 @app.route("/replace")
 def replace_pii():
     print("Replacing", request.headers['text'])
@@ -718,6 +720,7 @@ def replace_pii():
     print(replaced)
     return replaced
 
+# Remove API route
 @app.route("/remove")
 def remove_pii():
     print("Removing", request.headers['text'])
@@ -725,6 +728,7 @@ def remove_pii():
     print(removed)
     return removed
 
+# Default API route that lets the user know their code is working
 @app.route("/")
 def hello():
     return "Hello, your api is running!"

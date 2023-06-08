@@ -74,16 +74,24 @@ export default function Home() {
 
     let question = query.trim();
 
+    // Log question using api/client endpoint
+    await fetch('/api/clientAPI', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `Question is : ${question}` }),
+    });
     let basic = question;
+    // similar to ingest we have to make a function that returns a promise in order to force the code
+    // to remove the PII before sending the question to openai
     function sendRemoveRequest(): Promise<string> {
       return new Promise((resolve, reject) => {
       const options1 = {
         hostname: '127.0.0.1',
         port: 5000,
-        path: '/remove', // Replace with your API endpoint
+        path: '/remove',
         method: 'GET',
         headers: {
-          'Content-Type': 'text/plain', // Set the header to "text"
+          'Content-Type': 'text/plain', 
           'text': question // Set the text to be replaced
         }
       };
@@ -94,8 +102,8 @@ export default function Home() {
           response += chunk;
         });
         res.on('end', () => {
-          console.log(response); // Handle the response data here
-          question = response;
+          console.log(response); 
+          question = response; // Set question to the response we get from our API
           resolve(response)
         });
       });
@@ -106,6 +114,8 @@ export default function Home() {
     
       req1.end();
       
+      // set the message state of the GUI to the non-tokenized question so the user doesn't
+      // have to deal with tokens (this is just visuals and is not sent to openAI)
       setMessageState((state) => ({
         ...state,
         messages: [
@@ -115,22 +125,17 @@ export default function Home() {
             message: basic,
           },
         ],
-      })); 
+      }));
+      setLoading(true);
+      setQuery(''); 
     });
     }
     
 
-    setLoading(true);
-    setQuery('');
+    
     async function move_on(): Promise<any> {
-      
-     // Log question using api/client endpoint
-     await fetch('/api/clientAPI', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: `Question is : ${question}` }),
-  });
       try {
+        // get response from gpt
         const response = await fetch('/api/chat', {
           method: 'POST',
           headers: {
@@ -144,16 +149,19 @@ export default function Home() {
         let data = await response.json();
         console.log('data', data);
         let tokenized = data.text;
+
+        // as before, we have to make a function in order to stop the code from running until the output
+        // is detokenized
         function sendReplaceRequest(): Promise<string> {
           
           return new Promise((resolve, reject) => {
           const options = {
             hostname: '127.0.0.1',
             port: 5000,
-            path: '/replace', // Replace with your API endpoint
+            path: '/replace', 
             method: 'GET',
             headers: {
-              'Content-Type': 'text/plain', // Set the header to "text"
+              'Content-Type': 'text/plain', 
               'text': data.text // Set the text to be replaced
             }
           };
@@ -164,8 +172,8 @@ export default function Home() {
               response += chunk;
             });
             res.on('end', () => {
-              console.log(response); // Handle the response data here
-              data.text = response;
+              console.log(response); 
+              data.text = response; // set the text to the response data
               resolve(response);
             });
           });
@@ -191,8 +199,8 @@ export default function Home() {
                   sourceDocs: data.sourceDocuments,
                 },
               ],
-              history: [...state.history, [question, tokenized]],
-            }));
+              history: [...state.history, [question, tokenized]], // Here we set the history to have the tokenized form so future context that is sent
+            }));                                                  // is still safe to send to openai
           }
           console.log('messageState', messageState);
   
@@ -202,6 +210,7 @@ export default function Home() {
           messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
           } 
 
+          // send the replace request and then finally finish and update the screen
           sendReplaceRequest()
           .then((responseData) => {
             finish();
@@ -213,6 +222,7 @@ export default function Home() {
         console.log('error', error);
       }
     }
+    // send the remove request and then go to the move on function which gets a response from openai
     sendRemoveRequest()
     .then((responseData) => {
       move_on();

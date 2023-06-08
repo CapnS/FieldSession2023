@@ -23,16 +23,20 @@ export const run = async () => {
     // const loader = new PDFLoader(filePath);
     let rawDocs = await directoryLoader.load();
 
+    // Here we make a function that returns a promise in order to force our pii removal to finish before
+    // it is uploaded to the Pinecode Index
     function sendRequest(): Promise<string> {
       return new Promise((resolve, reject) => {
+      
+      // for each document, send an API request to our localhost API that will remove PII
       rawDocs.forEach((doc) => {
       const options1 = {
         hostname: '127.0.0.1',
         port: 5000,
-        path: '/remove', // Replace with your API endpoint
+        path: '/remove', 
         method: 'GET',
         headers: {
-          'content-type': 'text/plain', // Set the header to "text"
+          'content-type': 'text/plain', 
           'text': doc.pageContent.replace(/\r?\n|\r/g, '') // Set the text to be replaced
         }
       };
@@ -43,8 +47,8 @@ export const run = async () => {
           response += chunk;
         });
         res.on('end', () => {
-          console.log('response', response); // Handle the response data here
-          doc.pageContent = response;
+          console.log('response', response); 
+          doc.pageContent = response; // Set the page content to the tokenized data
           resolve(response);
         });
       });
@@ -92,6 +96,7 @@ export const run = async () => {
     });
   
   };
+  // call our request function and then call the keep going function, this ensures that the correct data is sent
   sendRequest()
   .then((responseData) => {
     console.log('raw docs', rawDocs);
