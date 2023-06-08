@@ -74,6 +74,13 @@ export default function Home() {
 
     const question = query.trim();
 
+     // Log question using api/client endpoint
+     await fetch('/api/clientAPI', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `Question is : ${question}` }),
+  });
+
     const options1 = {
       hostname: '127.0.0.1',
       port: 5000,

@@ -7,6 +7,8 @@ import { PINECONE_INDEX_NAME, PINECONE_NAME_SPACE } from '@/config/pinecone';
 import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
 import { stringify } from 'querystring';
 import http from 'http';
+import logger from '../utils/logger';  
+import * as path from 'path';
 
 /* Name of directory to retrieve your files from */
 const filePath = 'docs';
@@ -72,6 +74,16 @@ export const run = async () => {
     const embeddings = new OpenAIEmbeddings();
     const index = pinecone.Index(PINECONE_INDEX_NAME); //change to your own index name
 
+
+    // Log the source string for each document with timestamp
+    console.log('Creating loggable event...');
+    docs.forEach(doc => {
+      const fileName = path.basename(doc.metadata.source);
+      const timestamp = new Date().toISOString();
+      logger.info(`Document source: ${fileName} - Timestamp: ${timestamp}`);
+    });
+
+
     //embed the PDF documents
     await PineconeStore.fromDocuments(docs, embeddings, {
       pineconeIndex: index,
@@ -95,5 +107,5 @@ export const run = async () => {
 
 (async () => {
   await run();
-  console.log('ingestion complete');
+  console.log('ingestion complete00');
 })();
