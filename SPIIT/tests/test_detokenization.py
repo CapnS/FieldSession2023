@@ -14,7 +14,7 @@ class TestDetectionMethods(unittest.TestCase):
         replaced = replace(text)
         self.assertEqual(replaced,"Hello, my phone number is 713-392-8668")
 
-    def test_hard_replace(self):
+    def test_complex_replace(self):
         text = '''
         In the charming town of Anytown, USA, John Smith resides at 123 Elm Street, a cozy home adorned with a white picket fence and a beautifully landscaped front yard. With a passion for photography, John spends his evenings capturing the picturesque scenes that surround his neighborhood. You can reach him at johnsmith@email.com if you're interested in his stunning portfolio.
 
@@ -27,9 +27,7 @@ class TestDetectionMethods(unittest.TestCase):
         Each of these individuals brings their unique passions and interests to their neighborhoods, fostering a sense of community and connection. Whether it's photography, gardening, collecting, or baking, the residents of these homes are always eager to share their joy and build new connections with like-minded individuals.
         '''
         tokenized = remove(text)[2]
-        #print(tokenized)
         replaced = replace(tokenized)
-        #print(replaced)
         self.assertEqual(replaced, text)
 
     def test_multiple_replace(self):
@@ -69,7 +67,7 @@ class TestDetectionMethods(unittest.TestCase):
 
         Jackson Stein: 124-53-1345
         Max Johnson: 156-24-1582
-        Jim Jimmy: 899-63-6324
+        Jim Jimmy: 982-63-6324
         Sean Goldman: 609-15-6314
 
 
@@ -99,7 +97,7 @@ class TestDetectionMethods(unittest.TestCase):
 
         List of Those People and Their Home Address:
 
-        Jackson Stein: 8190 Elmora Street.
+        Jackson Stein: 8190 Elmora Street
         Max Johnson: 1020 Illinois St.
         Jim Jimmy: 834 Jim blvd.
         Sean Goldman: 5 Waverly Ct.

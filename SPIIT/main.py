@@ -564,10 +564,10 @@ def remove(text):
                 
                 
                 while element in text3:
-                    index = re.search(r"\b" + re.escape(element) + r"\b", text3)
+                    index = re.search(re.escape(element), text3)
                     if index is not None:
                         index = index.start()
-                        text3 = text3[:index] + char + "{<" + token + ">}" + text3[index + len(element):]
+                        text3 = text3[:index] + char + "<<<" + token + ">>>" + text3[index + len(element):]
                     else:
                         break
   
@@ -593,13 +593,17 @@ def replace(text):
     # faster to only search for the tokens that are actually necessary 
     new_text = text
     for i, word in enumerate(text.split(' ')):
-        match = re.search(r'[A-Z]{<[a-z0-9]{32}>}', word)
+        match = re.search(r'[A-Z]<<<[a-z0-9]{32}>>>', word)
         if match:
             #print("Word:",word)
-            token = word[match.start()+3:match.end()-2]
+            token = word[match.start()+4:match.end()-3]
             to_replace = word[match.start():match.end()]
             #print(token, to_replace)
-            pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
+            try:
+                pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
+            except:
+                print("Token not found in database.")
+                continue
             index = new_text.find(to_replace)
             new_text = new_text[:index] + pii + new_text[index+len(to_replace):]
 

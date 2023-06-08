@@ -29,7 +29,9 @@
     "react-dom": "^18.2.0",
     "react-markdown": "^8.0.5",
     "react-modal": "^3.16.1",
-    "tailwind-merge": "^1.10.0"
+    "tailwind-merge": "^1.10.0",
+    "winston": "^3.9.0",
+    "yarn": "^1.22.19"
   },
   "devDependencies": {
     "@types/node": "^18.14.6",

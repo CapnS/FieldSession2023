@@ -12,6 +12,7 @@ npm install next
 npm install nookies
 npm install react
 npm install react-modal
+npm install winston
 npm audit fix
 
 Finally, you will have to change the way node parses pdfs like so:

@@ -72,124 +72,151 @@ export default function Home() {
       return;
     }
 
-    const question = query.trim();
+    let question = query.trim();
 
-     // Log question using api/client endpoint
-     await fetch('/api/clientAPI', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: `Question is : ${question}` }),
-  });
-
-    const options1 = {
-      hostname: '127.0.0.1',
-      port: 5000,
-      path: '/remove', // Replace with your API endpoint
-      method: 'GET',
-      headers: {
-        'Content-Type': 'text/plain', // Set the header to "text"
-        'text': question // Set the text to be replaced
-      }
-    };
-  
-    const req1 = http.request(options1, (res) => {
-      let response = '';
-      res.on('data', (chunk) => {
-        response += chunk;
-      });
-      res.on('end', () => {
-        console.log(response); // Handle the response data here
-        const question = response;
-      });
-    });
-    req1.on('error', (error) => {
-      console.error('Error:', error);
-    });
-  
-    req1.end();
-
-    setMessageState((state) => ({
-      ...state,
-      messages: [
-        ...state.messages,
-        {
-          type: 'userMessage',
-          message: question,
-        },
-      ],
-    }));
-
-    setLoading(true);
-    setQuery('');
-
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          question,
-          history,
-        }),
-      });
-      const data = await response.json();
-      console.log('data', data);
-
-      const options = {
+    let basic = question;
+    function sendRemoveRequest(): Promise<string> {
+      return new Promise((resolve, reject) => {
+      const options1 = {
         hostname: '127.0.0.1',
         port: 5000,
-        path: '/replace', // Replace with your API endpoint
+        path: '/remove', // Replace with your API endpoint
         method: 'GET',
         headers: {
           'Content-Type': 'text/plain', // Set the header to "text"
-          'text': data.text // Set the text to be replaced
+          'text': question // Set the text to be replaced
         }
       };
     
-      const req = http.request(options, (res) => {
+      const req1 = http.request(options1, (res) => {
         let response = '';
         res.on('data', (chunk) => {
           response += chunk;
         });
         res.on('end', () => {
           console.log(response); // Handle the response data here
-          data.text = response;
+          question = response;
+          resolve(response)
         });
       });
-      req.on('error', (error) => {
+      req1.on('error', (error) => {
         console.error('Error:', error);
+        reject(error)
       });
     
-      req.end();
-
-      if (data.error) {
-        setError(data.error);
-      } else {
-        setMessageState((state) => ({
-          ...state,
-          messages: [
-            ...state.messages,
-            {
-              type: 'apiMessage',
-              message: data.text,
-              sourceDocs: data.sourceDocuments,
-            },
-          ],
-          history: [...state.history, [question, data.text]],
-        }));
-      }
-      console.log('messageState', messageState);
-
-      setLoading(false);
-
-      //scroll to bottom
-      messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
-    } catch (error) {
-      setLoading(false);
-      setError('An error occurred while fetching the data. Please try again.');
-      console.log('error', error);
+      req1.end();
+      
+      setMessageState((state) => ({
+        ...state,
+        messages: [
+          ...state.messages,
+          {
+            type: 'userMessage',
+            message: basic,
+          },
+        ],
+      })); 
+    });
     }
+    
+
+    setLoading(true);
+    setQuery('');
+    async function move_on(): Promise<any> {
+      
+     // Log question using api/client endpoint
+     await fetch('/api/clientAPI', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `Question is : ${question}` }),
+  });
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            question,
+            history,
+          }),
+        });
+        let data = await response.json();
+        console.log('data', data);
+        let tokenized = data.text;
+        function sendReplaceRequest(): Promise<string> {
+          
+          return new Promise((resolve, reject) => {
+          const options = {
+            hostname: '127.0.0.1',
+            port: 5000,
+            path: '/replace', // Replace with your API endpoint
+            method: 'GET',
+            headers: {
+              'Content-Type': 'text/plain', // Set the header to "text"
+              'text': data.text // Set the text to be replaced
+            }
+          };
+        
+          const req = http.request(options, (res) => {
+            let response = '';
+            res.on('data', (chunk) => {
+              response += chunk;
+            });
+            res.on('end', () => {
+              console.log(response); // Handle the response data here
+              data.text = response;
+              resolve(response);
+            });
+          });
+          req.on('error', (error) => {
+            console.error('Error:', error);
+            reject(error);
+          });
+        
+          req.end();
+          });
+        }
+        async function finish(): Promise<any> {
+          if (data.error) {
+            setError(data.error);
+          } else {
+            setMessageState((state) => ({
+              ...state,
+              messages: [
+                ...state.messages,
+                {
+                  type: 'apiMessage',
+                  message: data.text,
+                  sourceDocs: data.sourceDocuments,
+                },
+              ],
+              history: [...state.history, [question, tokenized]],
+            }));
+          }
+          console.log('messageState', messageState);
+  
+          setLoading(false);
+  
+          //scroll to bottom
+          messageListRef.current?.scrollTo(0, messageListRef.current.scrollHeight);
+          } 
+
+          sendReplaceRequest()
+          .then((responseData) => {
+            finish();
+          });
+        }
+      catch (error) {
+        setLoading(false);
+        setError('An error occurred while fetching the data. Please try again.');
+        console.log('error', error);
+      }
+    }
+    sendRemoveRequest()
+    .then((responseData) => {
+      move_on();
+    });
   }
 
   //prevent empty submissions
