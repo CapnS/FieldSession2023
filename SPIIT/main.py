@@ -43,7 +43,8 @@ def remove(text):
     ner_model = "dslim/bert-base-NER"
 
     punc_list = '''!()[]{};*:'"\,<>./?_~-'''
-    date_pattern = ["(0[1-9]|[12][0-9]|3[01])(\/|-)(0[1-9]|1[1,2])(\/|-)(19|20)\d{2}","(0[1-9]|1[1,2])(\/|-)(0[1-9]|[12][0-9]|3[01])(\/|-)(19|20)\d{2}", "^(19|20)\d{2}\/(0[1-9]|1[1,2])\/(0[1-9]|[12][0-9]|3[01])$"]
+    #for dates as for right following patterns should be recognized: dd/mm/yyyy, dd.mm.yyyy, mm/dd/yyyy, mm.dd.yyyy, mm/yyyy, mm/yy, mm.yy,mm.yyyy 
+    date_pattern = ["(0[1-9]|[12][0-9]|3[01])(\/|-)(0[1-9]|1[1,2])(\/|-)(19|20)\d{2}","(0[1-9]|1[1,2])(\/|-)(0[1-9]|[12][0-9]|3[01])(\/|-)(19|20)\d{2}", "^(19|20)\d{2}\/(0[1-9]|1[1,2])\/(0[1-9]|[12][0-9]|3[01])$", r"^(0[1-9]|1[0-2])[\/\.]\d{2}$", r"^(0[1-9]|1[0-2])[\./]\d{4}$" ]
     ssn_validate_pattern = "^(?!666|000|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0{4})\\d{4}$"
     email_validate_pattern = r"^\S+@\S+\.\S+$"
     ip_validate_pattern = "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"
@@ -51,11 +52,11 @@ def remove(text):
     passport_pattern_old = r"^[A-Z0-9]{9}$"
     passport_pattern_new = r"^[A-Z]\d{8}$"
     Dl_pattern = ["^[0-9]{7}$","^[A-Z]{1}[0-9]{8}$", "^[0-9]{9}", "^[0-9]{8}$", "^[A-Z]{1}[0-9]{7}$", "(^[A-Z]{1}[0-9]{3,6}$)|(^[A-Z]{2}[0-9]{2,5}$)", "^[A-Z]{1}[0-9]{12}$", "^[A-Z]{2}[0-9]{6}[A-Z]{1}$", "^[A-Z]{1}[0-9]{11,12}$","^[0-9]{10}", "^([0-9]{9}|([0-9]{3}[A-Z]{2}[0-9]{4}))$","^[A-Z]{2}[0-9]{6-7}$", "^[A-Z]{1}[0-9]{9-10}$", "(^[A-Z]{1}[0-9]{5,9}$)|(^[A-Z]{1}[0-9]{6}[R]{1}$)|(^[0-9]{3}[A-Z]{1}[0-9]{6}$)|(^[0-9]{8}[A-Z]{2}$)|(^[0-9]{9}[A-Z]{1}$)","(^[A-Z]{1}[0-9]{8}$)|(^[0-9]{13}$)|(^[0-9]{14}$)", "(^[0-9]{2}[A-Z]{3}[0-9]{5}$)|(^[A-Z]{3}[0-9]{8}$)","^[A-Z]{1}[0-9]{14}$","^[0-9]{12}$","^[A-Z]{3}[0-9]{6}$", "^[0-9]{7}[A-Z]$"]
-    # we can add more cc types
-    amex_validate_pattern = "^3[47][0-9]{13}$"
-    visa_validate_pattern = "^4[0-9]{12}(?:[0-9]{3})?$"
-    master_card_validate_pattern = "^(5[1-5][0-9]{14}|2(22[1-9][0-9]{12}|2[3-9][0-9]{13}|[3-6][0-9]{14}|7[0-1][0-9]{13}|720[0-9]{12}))$"
-
+    # we can add more cc types. So far we have amex, visa, and master card which can be detected either in the right format or with no spaces (Ex. 5123 4567 8901 2346, 5123456789012346)
+    cc_validate_pattern = ["^3[47][0-9]{13}$", r"^(?:4\d{3}(\s\d{4}){3})$", "^4[0-9]{12}(?:[0-9]{3})?$", "^(5[1-5][0-9]{14}|2(22[1-9][0-9]{12}|2[3-9][0-9]{13}|[3-6][0-9]{14}|7[0-1][0-9]{13}|720[0-9]{12}))$", r"^3[47]\d{2}\s\d{6}\s\d{5}$", "^(?:5[1-5]\d{2}|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)\s\d{4}\s\d{4}\s\d{4}$", "^5[1-5]\d{2}\s\d{4}\s\d{4}\s\d{4}$", r"\b\d{4}\s\d{4}\s\d{4}\s\d{4}\b"]
+    # following patterns should be recognized based on phone numbers: +1(123)987-6543,+1-555-987-6543,+1234567896,123-456-7890,(123)456-7890,123.456.7890,1234567890,1-123-456-6789,1 (123) 345-6789, 1 123 456 7890
+    phone_pattern = [r"^\+1 \(\d{3}\) \d{3}-\d{4}$","^\+1-\d{3}-\d{3}-\d{4}$","^\+?\d{11}$", "^\d{3}-\d{3}-\d{4}$", "^\(\d{3}\) \d{3}-\d{4}$", "^\d{3}\.\d{3}\.\d{4}$", "^\d{10}$", "^1-\d{3}-\d{3}-\d{4}$", "^1 \(\d{3}\) \d{3}-\d{4}$","^1 \d{3} \d{3} \d{4}$",  r"^\+1\s+\d{3}\s+\d{3}\s+\d{4}$", r"^\+1\s\s\d{3}\s\s\d{3}\s\d{4}$"]
+    
     #read pdf and store it as a string 
     #p = open('Invoice  with lots of Passport Numbers, names, ssns, and drivers license numbers.pdf', 'rb')
     #pdf = PyPDF2.PdfReader(p)
@@ -64,7 +65,7 @@ def remove(text):
 
     
 
-
+    text5 = text 
     text2 = text 
     text4 = text 
 
@@ -104,6 +105,56 @@ def remove(text):
     dl_list = []
     all_pii = []
 
+      # extract punctuation for better performance of the libraries 
+    for i in text5:
+        if i in punc_list:
+            text5 = text5.replace(i, " ")
+
+    for format in cc_validate_pattern:
+        while re.search(format,text5):
+            matches = re.findall(format, text5)
+            for match in matches:
+                temp = match
+                temp2 = temp.replace(" ", "")
+                # append cc to list 
+                while temp in text3:
+                    text3 = text3.replace(temp, temp2)
+                if temp2 not in cc_list:
+                    cc_list.append(temp2)
+                    x = 'x'
+                    for n in range (len(temp)-1):
+                        x = x + 'x'; 
+                        text = text.replace(temp, x)
+                    x = 'x'
+                    for n in range (len(temp2)-1):
+                        x = x + 'x'; 
+                        text5 = text5.replace(temp, x)
+                    
+
+    # detect cc with no spaces between and replace it with xxx
+    for word in text.split():
+        if word[-1] in punc_list:
+            word = word.rstrip(punc_list)
+        for format in cc_validate_pattern:
+            if (re.match(format, word)):
+            # append cc to list 
+                if word not in cc_list:
+                    cc_list.append(word)
+                    x = 'x'
+                    for n in range (len(word)-1):
+                        x = x + 'x'; 
+                    text = text.replace(word, x)
+    
+            
+
+            
+        
+        
+    new_list = []
+    new_list.append("C")
+    new_list.append(cc_list)
+    all_pii.append(new_list)
+    
     # extract punctuation for better performance of the libraries 
     for i in text4:
         if i in punc_list:
@@ -117,7 +168,7 @@ def remove(text):
     for word in text4.split():
         #edge case: make sure that there is no punctuation after the passport number; otherwise, it will not be detected
         if word[-1] in punc_list:
-            word = word[:-1]
+            word = word.rstrip(punc_list)
         if (re.match(passport_pattern_new, word)):
             if word not in passport_list:
                 passport_list.append(word)
@@ -128,10 +179,11 @@ def remove(text):
 
     # detect ssn and replace it with xxx
     for word in text.split():
+        
         #edge case: make sure that there is no punctuation after the ssn; otherwise, it will not be detected
         #all the punctuation can not be extracted at this point because "-" are part of the ssn
         if word[-1] in punc_list:
-            word = word[:-1]
+            word = word.rstrip(punc_list)
         if (re.match(ssn_validate_pattern, word)):
             # append ssn to ssn_list
             if word not in ssn_list:
@@ -308,7 +360,7 @@ def remove(text):
     for word in text.split():
         #edge case: make sure that there is no punctuation after the dl; otherwise, it will not be detected
         if word[-1] in punc_list:
-            word = word[:-1]
+            word = word.rstrip(punc_list)
         for format in Dl_pattern:
             if (re.match(format, word)):
             # append dl to dl_list
@@ -376,7 +428,7 @@ def remove(text):
             if isDigit == True and len(word) > 5 and word[0] != "$":
                 # sometimes it will grab pii with punctuation, so we need to make sure to get rid of it before passing into the list 
                 if word[-1] in punc_list:
-                    word = word[:-1]
+                    word = word.rstrip(punc_list)
                 if one_type == 1 and character == 'D':
                     if word not in dl_list:
                         dl_list.append(word)
@@ -416,6 +468,8 @@ def remove(text):
     # detect phone numbers and replace them with xxx       
     for match in phonenumbers.PhoneNumberMatcher(text, "US"):
         for word in text.split():
+            if word[-1] in punc_list:
+                word = word.rstrip(punc_list)
             if word == match.raw_string:
             #append phone numbers to phone_list
                 if word not in phone_list:
@@ -424,7 +478,19 @@ def remove(text):
                     for n in range (len(word)-1):
                         x = x + 'x'; 
                     text = text.replace(word, x)
-                
+    for format in phone_pattern:
+        #while re.search(format, text5):
+        matches = re.findall(format, text5)
+        for match in matches:               
+            temp = match
+            # append phone to list 
+            if temp not in phone_list:
+                phone_list.append(temp)
+                x = 'x'
+                for n in range (len(temp)-1):
+                    x = x + 'x'; 
+                    text = text.replace(temp, x)
+              
     new_list = []
     new_list.append("P")
     new_list.append(phone_list)
@@ -436,7 +502,7 @@ def remove(text):
             #edge case: make sure that there is no punctuation after the email; otherwise, it will be grabbed and considered as a part of the email
             #all the punctuation can not be extracted at this point because "@" and "." are part of the email
             if word[-1] in punc_list:
-                word = word[:-1]
+                word = word.rstrip(punc_list)
             if word not in email_list:
                 email_list.append(word)
                 x = 'x';
@@ -470,25 +536,6 @@ def remove(text):
     new_list.append(ip_list)
     all_pii.append(new_list)
 
-    # detect cc and replace it with xxx
-    for word in text.split():
-        if (re.match(amex_validate_pattern, word) or re.match(visa_validate_pattern, word) or re.match(master_card_validate_pattern, word)):
-            #edge case: make sure that there is no punctuation after the cc
-            if word[-1] in punc_list:
-                word = word[:-1]
-            if word not in cc_list:
-                cc_list.append(word)
-                x = 'x';
-                for n in range (len(word)-1):
-                    x = x + 'x'; 
-                
-                text = text.replace(word, x)
-
-    new_list = []
-    new_list.append("C")
-    new_list.append(cc_list)
-    all_pii.append(new_list)
-
 
     #second nlp that we are using for dates 
     nlp = spacy.load("en_core_web_sm")
@@ -519,7 +566,7 @@ def remove(text):
     for word in text3.split():
         #edge case: make sure that there is no punctuation after the 
         if word[-1] in punc_list:
-            word = word[:-1]
+            word = word.rstrip(punc_list)
         for format in date_pattern:
             if (re.match(format, word)):
             # append date 
@@ -591,6 +638,7 @@ def replace(text):
     # Here we need to decide whether we should get a dict of all token-> PII or just look through the database every time we hit a token in the text
     # Don't know which is faster, but since we shouldn't expect many tokens to be in the response (which is where we are replacing) it is probably
     # faster to only search for the tokens that are actually necessary 
+    punc_list = '''!()[]{};*:'"\,<>./?_~-'''
     new_text = text
     for i, word in enumerate(text.split(' ')):
         match = re.search(r'[A-Z]{<[a-z0-9]{32}>}', word)
@@ -598,10 +646,11 @@ def replace(text):
             #print("Word:",word)
             token = word[match.start()+3:match.end()-2]
             to_replace = word[match.start():match.end()]
-            #print(token, to_replace)
-            pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
-            index = new_text.find(to_replace)
-            new_text = new_text[:index] + pii + new_text[index+len(to_replace):]
+            result = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()
+            if result is not None and result[0] is not None:
+                pii = result[0]
+                index = new_text.find(to_replace)
+                new_text = new_text[:index] + pii + new_text[index+len(to_replace):]
 
 
     # Writing to File

@@ -25,6 +25,19 @@ class TestDetectionMethods(unittest.TestCase):
         print("\nDETOKENIZED:\n", replaced)
         
         self.assertEqual(replaced, text)
+        
+    def test_d_pii(self) :
+        text = '''"Jane Smith is a fictional character. Her full name is Jane Elizabeth Smith. 
+                She lives at 456 Maple Avenue, Pleasantville, USA. Jane's phone number is 713-392-8668 . 
+                Her email address is janesmith@example.com. She has a credit card with the number 5123 4567 8901 2346.
+                It expires on 12/25. Once again her cc number is 5123456789012346. Jane's Social Security number is 123-45-6789."'''
+        tokenized = remove(text)[2]
+        print("\nORIGINAL:\n", text)
+        print("\nTOKENIZED:\n", tokenized)
+        replaced = replace(tokenized)
+        print("\nDETOKENIZED:\n", replaced)
+        
+        self.assertEqual(replaced, text)
 
 if __name__ == '__main__':
     unittest.main()
