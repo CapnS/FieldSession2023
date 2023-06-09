@@ -42,7 +42,7 @@ def remove(text):
 
     ner_model = "dslim/bert-base-NER"
 
-    punc_list = '''!()[]{};*:'"\,<>./?_~-'''
+    punc_list = '''!()[]{};*:'"\,<>./?_~-+'''
     #for dates as for right following patterns should be recognized: dd/mm/yyyy, dd.mm.yyyy, mm/dd/yyyy, mm.dd.yyyy, mm/yyyy, mm/yy, mm.yy,mm.yyyy 
     date_pattern = ["(0[1-9]|[12][0-9]|3[01])(\/|-)(0[1-9]|1[1,2])(\/|-)(19|20)\d{2}","(0[1-9]|1[1,2])(\/|-)(0[1-9]|[12][0-9]|3[01])(\/|-)(19|20)\d{2}", "^(19|20)\d{2}\/(0[1-9]|1[1,2])\/(0[1-9]|[12][0-9]|3[01])$", r"^(0[1-9]|1[0-2])[\/\.]\d{2}$", r"^(0[1-9]|1[0-2])[\./]\d{4}$" ]
     ssn_validate_pattern = "^(?!666|000|9\\d{2})\\d{3}-(?!00)\\d{2}-(?!0{4})\\d{4}$"
@@ -55,7 +55,7 @@ def remove(text):
     # we can add more cc types. So far we have amex, visa, and master card which can be detected either in the right format or with no spaces (Ex. 5123 4567 8901 2346, 5123456789012346)
     cc_validate_pattern = ["^3[47][0-9]{13}$", r"^(?:4\d{3}(\s\d{4}){3})$", "^4[0-9]{12}(?:[0-9]{3})?$", "^(5[1-5][0-9]{14}|2(22[1-9][0-9]{12}|2[3-9][0-9]{13}|[3-6][0-9]{14}|7[0-1][0-9]{13}|720[0-9]{12}))$", r"^3[47]\d{2}\s\d{6}\s\d{5}$", "^(?:5[1-5]\d{2}|222[1-9]|22[3-9]\d|2[3-6]\d{2}|27[01]\d|2720)\s\d{4}\s\d{4}\s\d{4}$", "^5[1-5]\d{2}\s\d{4}\s\d{4}\s\d{4}$", r"\b\d{4}\s\d{4}\s\d{4}\s\d{4}\b"]
     # following patterns should be recognized based on phone numbers: +1(123)987-6543,+1-555-987-6543,+1234567896,123-456-7890,(123)456-7890,123.456.7890,1234567890,1-123-456-6789,1 (123) 345-6789, 1 123 456 7890
-    phone_pattern = [r"^\+1 \(\d{3}\) \d{3}-\d{4}$","^\+1-\d{3}-\d{3}-\d{4}$","^\+?\d{11}$", "^\d{3}-\d{3}-\d{4}$", "^\(\d{3}\) \d{3}-\d{4}$", "^\d{3}\.\d{3}\.\d{4}$", "^\d{10}$", "^1-\d{3}-\d{3}-\d{4}$", "^1 \(\d{3}\) \d{3}-\d{4}$","^1 \d{3} \d{3} \d{4}$",  r"^\+1\s+\d{3}\s+\d{3}\s+\d{4}$", r"^\+1\s\s\d{3}\s\s\d{3}\s\d{4}$"]
+    phone_pattern = [r"^\+1 \(\d{3}\) \d{3}-\d{4}$","^\+1-\d{3}-\d{3}-\d{4}$","^\+?\d{11}$", "^\d{3}-\d{3}-\d{4}$", "^\(\d{3}\) \d{3}-\d{4}$", "^\d{3}\.\d{3}\.\d{4}$", "^\d{10}$", "^1-\d{3}-\d{3}-\d{4}$", "^1 \(\d{3}\) \d{3}-\d{4}$","^1 \d{3} \d{3} \d{4}$",  r"^\+1\s+\d{3}\s+\d{3}\s+\d{4}$", r"^\+1\s\s\d{3}\s\s\d{3}\s\d{4}$", r"\d{3} \d{3} \d{4}", r"^1\s{2}\d{3}\s{2}\d{3}\s\d{4}$"]
     
     #read pdf and store it as a string 
     #p = open('Invoice  with lots of Passport Numbers, names, ssns, and drivers license numbers.pdf', 'rb')
@@ -252,8 +252,8 @@ def remove(text):
 
     # load data from nlp into lists associated with it 
     for entity_group in output:
-        print(entity_label)
-        print(entity_group["word"])
+        #print(entity_label)
+        #print(entity_group["word"])
         entity_label = entity_group["entity_group"]  
 
         if entity_label == "PER":
@@ -468,8 +468,11 @@ def remove(text):
     
 
     # detect phone numbers and replace them with xxx       
-    for match in phonenumbers.PhoneNumberMatcher(text, "US"):
-        for word in text.split():
+    #for match in phonenumbers.PhoneNumberMatcher(text, "US"):
+    for word in text.split():
+        if word[-1] in punc_list:
+                word = word.rstrip(punc_list)
+        for match in phonenumbers.PhoneNumberMatcher(word, "US"):
             if word[-1] in punc_list:
                 word = word.rstrip(punc_list)
             if word == match.raw_string:
@@ -480,11 +483,14 @@ def remove(text):
                     for n in range (len(word)-1):
                         x = x + 'x'; 
                     text = text.replace(word, x)
+
     for format in phone_pattern:
         #while re.search(format, text5):
         matches = re.findall(format, text5)
         for match in matches:               
             temp = match
+            start_ind = text5.find(temp)
+            temp = text[start_ind:start_ind+len(temp)]
             # append phone to list 
             if temp not in phone_list:
                 phone_list.append(temp)
@@ -586,7 +592,7 @@ def remove(text):
     # need to tokenize all the dates 
 
     all_pii.append(new_list)
-    print(all_pii)
+
 
     token_list = []
     seen = []
@@ -600,8 +606,6 @@ def remove(text):
                 if element == ' ':
                     pii_list[1].remove(element)
                     continue
-                print("element")
-                print(element)
                 if not element :
                     continue
                 
@@ -633,9 +637,9 @@ def remove(text):
     #   file.write(text3)
 
     #LOOP THROUGH LIST AND UPLOAD ALL TOKENS TO DATABASE HERE
-    print(token_list)
     for token in token_list:
-        if not(db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE PII_VALUE = %s", element).fetchall()):    
+
+        if not(db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE PII_VALUE = %s", token[2]).fetchall()):   
             db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES(%s, %s, %s)", (token[2], token[1], token[0]))
     return (text, token_list, text3)
 
@@ -644,21 +648,14 @@ def remove(text):
 
 def replace(text):
     new_text = text
-    print("in replace")
     for word in text.split(' '):
         
-        print(word)
         # search for our token in the word
         match = re.search(r'[A-Z]<<<[a-z0-9]{32}>>>', word)
-        print(match)
         if match:
             # if there is a match, single out the token and the actual part of the word to replace
             token = word[match.start()+4:match.end()-3]
-            print("token")
-            print(token)
             to_replace = word[match.start():match.end()]
-            print("replace")
-            print(to_replace)
             #if it's found in the database, set pii to that value, else continue
             try:
                 pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
