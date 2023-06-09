@@ -28,7 +28,8 @@ C represents a credit card number,
 E represents an email, 
 L represents a date,
 and U represents an unlabeled piece of personal information. 
-Please utilize the context when giving your responses, especially when it comes to names. 
+Please utilize the context when giving your responses, especially when it comes to names. Some people might have different tokens for their full name and just their last name, so make sure to treat those two tokens as the same person if you encounter a situation like that.
+Never respond with just the character, always give the full token in the correct form. 
 If you find data that fits into any of these categories that is not in tokenized form, please redact it from your responses.
 
 {context}

@@ -349,10 +349,16 @@ def remove(text):
     # then append each list in one nested list all_pii 
     # so we end up getting something like this:
     # all_pii = [['N', ['Chris Johnson']], ['O', ['Diamond Star International', 'Diamond Star']], ['P', ['713-832-1234']]]
+    new_people_list = people_list
+    for person in people_list:
+        for i, other_person in enumerate(people_list):
+            if other_person in person and other_person != person:
+                new_people_list.pop(i)
+                new_people_list.append(other_person)
 
     new_list = []
     new_list.append("N")
-    new_list.append(people_list)
+    new_list.append(new_people_list)
     all_pii.append(new_list)
 
     new_list = []
