@@ -78,8 +78,18 @@ def remove(text):
         page = pdf.pages[i]
         names_dataset += page.extract_text()
 
+    
     pd.close()
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    pd = open(os.path.join(dir_path,'dependencies','last_name.pdf'), 'rb')
+    pdf = PyPDF2.PdfReader(pd)
+    num_pages = len(pdf.pages)
+    last_names_dataset = ""
+    for i in range(num_pages):
+        page = pdf.pages[i]
+        last_names_dataset += page.extract_text()
 
+    pd.close()
     text3 = text
 
     #key words lists
@@ -243,7 +253,7 @@ def remove(text):
                     x = x + ' '                      
             text = text[:start_ind ] + x + text[start_ind+len(x):]
 
-        
+    print(address_list) 
     new_list = []
     new_list.append("R")
     new_list.append(passport_list)
@@ -301,14 +311,17 @@ def remove(text):
                     x = x + ' '                       
             text = text[:start_ind] + x + text[start_ind+len(x):]
                 
-    
-    
     # this is a second layer that checks if the names that were detected are in the dataset of 10 000 common names that we have created       
+    persons = []
+    persons = people_list
     for name in people_list:
         first = name.split()
-        if first[0] not in names_dataset:
-            people_list.remove(name)
-    
+        
+        if (first[0].lower() not in names_dataset.lower()) and (first[0].lower() not in last_names_dataset.lower()):
+            persons.remove(name)
+    people_list = persons
+
+        
     
     # check if any names were appended into undefined list, pop it from there and move it to the list of names 
     for word in undefined:
@@ -620,9 +633,9 @@ def remove(text):
                 temp.append(token)
                 token_list.append(temp)
                 
-                
+                pattern = r"\b" + re.escape(element) + r"\b"
                 # While the pii is still in the text, keep replacing it with the token
-                while element in text3:
+                while re.search(pattern,text3):
                     index = re.search(re.escape(element), text3)
                     if index is not None:
                         index = index.start()
