@@ -351,8 +351,9 @@ def remove(text):
     # all_pii = [['N', ['Chris Johnson']], ['O', ['Diamond Star International', 'Diamond Star']], ['P', ['713-832-1234']]]
     new_people_list = people_list
     for person in people_list:
-        for i, other_person in enumerate(people_list):
+        for other_person in people_list:
             if other_person in person and other_person != person:
+                i = new_people_list.index(other_person)
                 new_people_list.pop(i)
                 new_people_list.append(other_person)
 
@@ -745,23 +746,25 @@ app = Flask(__name__)
 CORS(app)
 
 # Replace API route
-@app.route("/replace")
+@app.route("/replace", methods=['POST'])
 def replace_pii():
-    print("Replacing", request.headers['text'])
-    replaced = replace(request.headers['text'])
+    text = request.data.decode('utf-8')
+    print("Replacing", text)
+    replaced = replace(text)
     print(replaced)
     return replaced
 
 # Remove API route
-@app.route("/remove")
+@app.route("/remove", methods=['POST'])
 def remove_pii():
-    print("Removing", request.headers['text'])
-    removed = remove(request.headers['text'])[2]
+    text = request.data.decode('utf-8')
+    print("Removing", text)
+    removed = remove(text)[2]
     print(removed)
     return removed
 
 # Default API route that lets the user know their code is working
-@app.route("/")
+@app.route("/", methods=['GET'])
 def hello():
     return "Hello, your api is running!"
 

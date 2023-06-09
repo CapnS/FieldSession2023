@@ -34,10 +34,10 @@ export const run = async () => {
         hostname: '127.0.0.1',
         port: 5000,
         path: '/remove', 
-        method: 'GET',
+        method: 'POST',
         headers: {
           'content-type': 'text/plain', 
-          'text': doc.pageContent.replace(/\r?\n|\r/g, '') // Set the text to be replaced
+          //'text': doc.pageContent.replace(/\r?\n|\r/g, '') // Set the text to be replaced
         }
       };
     
@@ -56,7 +56,8 @@ export const run = async () => {
         console.error('Error:', error);
         reject(error);
       });
-    
+      
+      req1.write(doc.pageContent);
       req1.end();
       
     });

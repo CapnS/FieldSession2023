@@ -89,10 +89,10 @@ export default function Home() {
         hostname: '127.0.0.1',
         port: 5000,
         path: '/remove',
-        method: 'GET',
+        method: 'POST',
         headers: {
-          'Content-Type': 'text/plain', 
-          'text': question // Set the text to be replaced
+          'content-type': 'text/plain', 
+          //'text': question // Set the text to be replaced
         }
       };
     
@@ -111,7 +111,8 @@ export default function Home() {
         console.error('Error:', error);
         reject(error)
       });
-    
+      
+      req1.write(question);
       req1.end();
       
       // set the message state of the GUI to the non-tokenized question so the user doesn't
@@ -159,10 +160,10 @@ export default function Home() {
             hostname: '127.0.0.1',
             port: 5000,
             path: '/replace', 
-            method: 'GET',
+            method: 'POST',
             headers: {
               'Content-Type': 'text/plain', 
-              'text': data.text // Set the text to be replaced
+              //'text': data.text // Set the text to be replaced
             }
           };
         
@@ -181,7 +182,8 @@ export default function Home() {
             console.error('Error:', error);
             reject(error);
           });
-        
+
+          req.write(data.text);
           req.end();
           });
         }
