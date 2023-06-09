@@ -252,7 +252,8 @@ def remove(text):
 
     # load data from nlp into lists associated with it 
     for entity_group in output:
-        
+        print(entity_label)
+        print(entity_group["word"])
         entity_label = entity_group["entity_group"]  
 
         if entity_label == "PER":
@@ -312,11 +313,12 @@ def remove(text):
     # check if any names were appended into undefined list, pop it from there and move it to the list of names 
     for word in undefined:
         first = word.split()
-        if first[0] in names_dataset:
-            undefined.remove(word)
-            people_list.append(word)
-        if word.isdigit() == False and word in undefined:
-            undefined.remove(word)
+        if first:
+            if first[0] in names_dataset:
+                undefined.remove(word)
+                people_list.append(word)
+            if word.isdigit() == False and word in undefined:
+                undefined.remove(word)
 
     for word in undefined:
         start_ind = text.find(word)
@@ -595,8 +597,14 @@ def remove(text):
             char = pii_list[0][0]
             
             for element in pii_list[1]:
-                if not element:
+                if element == ' ':
+                    pii_list[1].remove(element)
                     continue
+                print("element")
+                print(element)
+                if not element :
+                    continue
+                
                 temp = []
                 temp.append(char)
                 temp.append(element)
@@ -636,13 +644,21 @@ def remove(text):
 
 def replace(text):
     new_text = text
+    print("in replace")
     for word in text.split(' '):
+        
+        print(word)
         # search for our token in the word
         match = re.search(r'[A-Z]<<<[a-z0-9]{32}>>>', word)
+        print(match)
         if match:
             # if there is a match, single out the token and the actual part of the word to replace
             token = word[match.start()+4:match.end()-3]
+            print("token")
+            print(token)
             to_replace = word[match.start():match.end()]
+            print("replace")
+            print(to_replace)
             #if it's found in the database, set pii to that value, else continue
             try:
                 pii = db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE TOKEN = %s", token).fetchone()[0]
