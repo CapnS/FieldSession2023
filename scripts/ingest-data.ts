@@ -9,6 +9,7 @@ import { stringify } from 'querystring';
 import http from 'http';
 import logger from '../utils/logger';  
 import * as path from 'path';
+import { name } from '../pages/logIn';
 
 /* Name of directory to retrieve your files from */
 const filePath = 'docs';
@@ -113,5 +114,5 @@ export const run = async () => {
 
 (async () => {
   await run();
-  console.log('ingestion complete00');
+  console.log('ingestion complete');
 })();
