@@ -38,7 +38,7 @@ from flask_cors import CORS
 #link to the hub that have banch of traned models, data sets, etc. if you want to check it out 
 #https://huggingface.co/
 
-def remove(text):
+def remove(text, user):
 
     ner_model = "dslim/bert-base-NER"
 
@@ -657,10 +657,10 @@ def remove(text):
     #   file.write(text3)
 
     #LOOP THROUGH LIST AND UPLOAD ALL TOKENS TO DATABASE HERE
-    for token in token_list:
 
+    for token in token_list:
         if not(db_cursor_def.execute("SELECT PII_VALUE FROM PII_TOKEN_XREF WHERE PII_VALUE = %s", token[2]).fetchall()):   
-            db_cursor_def.execute("INSERT INTO PII_Token_XREF(Token, PII_VALUE, PII_TYPE) VALUES(%s, %s, %s)", (token[2], token[1], token[0]))
+            db_cursor_def.execute("INSERT INTO PII_Token_XREF(TOKEN, PII_VALUE, PII_TYPE, USER_ADDED) VALUES(%s, %s, %s, %s)", (token[2], token[1], token[0], user))
     return (text, token_list, text3)
 
 
@@ -759,7 +759,7 @@ def replace_pii():
 def remove_pii():
     text = request.data.decode('utf-8')
     print("Removing", text)
-    removed = remove(text)[2]
+    removed = remove(text, request.headers.get('name'))[2]
     print(removed)
     return removed
 

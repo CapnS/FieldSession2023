@@ -56,7 +56,7 @@ export const run = async () => {
         method: 'POST',
         headers: {
           'content-type': 'text/plain', 
-          //'text': doc.pageContent.replace(/\r?\n|\r/g, '') // Set the text to be replaced
+          'name': name
         }
       };
     

@@ -91,11 +91,11 @@ export default function Home() {
         path: '/remove',
         method: 'POST',
         headers: {
-          'content-type': 'text/plain', 
-          //'text': question // Set the text to be replaced
+          'content-type': 'text/plain',
+          'name': name // Set the user name
         }
       };
-    
+      console.log("NAME", name);
       const req1 = http.request(options1, (res) => {
         let response = '';
         res.on('data', (chunk) => {
@@ -162,8 +162,7 @@ export default function Home() {
             path: '/replace', 
             method: 'POST',
             headers: {
-              'Content-Type': 'text/plain', 
-              //'text': data.text // Set the text to be replaced
+              'Content-Type': 'text/plain'
             }
           };
         
