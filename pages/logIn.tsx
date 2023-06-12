@@ -2,13 +2,15 @@ import { useRouter } from 'next/router';
 import { useState, FormEvent } from 'react';
 import { setCookie } from 'nookies';
 
+export let name = ""; 
+
 function LoginPage() {
-  const [name, setName] = useState("");
+  const [localName, setLocalName] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (name !== "") {
+    if (localName !== "") {
       setCookie(null, 'isLoggedIn', 'true', {
         maxAge: 10, // time before cookie destructs in seconds
         path: '/',
@@ -17,7 +19,7 @@ function LoginPage() {
       try {
         const response = await fetch('/api/clientAPI', {
           method: 'POST',
-          body: JSON.stringify({ message: `User ${name} logged in` }),
+          body: JSON.stringify({ message: `User ${localName} logged in` }),
           headers: {
             'Content-Type': 'application/json',
           },
@@ -33,6 +35,7 @@ function LoginPage() {
         console.error(error);
       }
 
+      name = localName; // Assign localName to the exported name variable
       router.push("/"); //homepage redirection
     } else {
       alert("Please enter your name!");
@@ -46,8 +49,8 @@ function LoginPage() {
         <input
           type="text"
           placeholder="Enter your name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
+          value={localName}
+          onChange={(e) => setLocalName(e.target.value)}
           style={{ padding: "10px" }}
         />
         <button type="submit" style={{ backgroundColor: "green", color: "white", padding: "10px", border: "none", cursor: "pointer" }}>Login</button>
