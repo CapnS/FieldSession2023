@@ -3,7 +3,6 @@ spacy
 phonenumbers
 PyPDF2
 transformers
-snowflake
 tensorflow
 snowflake-connector-python
 python-dotenv
