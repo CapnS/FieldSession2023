@@ -10,12 +10,30 @@ import http from 'http';
 import logger from '../utils/logger';  
 import * as path from 'path';
 import { name } from '../pages/logIn';
+import * as readline from 'readline';
+
 
 /* Name of directory to retrieve your files from */
 const filePath = 'docs';
 
+
+
 export const run = async () => {
   try {
+    const name: string = await new Promise((resolve) => {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+
+      rl.question('Enter your name: ', (name: string) => {
+        rl.close();
+        resolve(name);
+      });
+    });
+
+    console.log(`Inputted name: , ${name}`);
+
     /*load raw docs from the all files in the directory */
     const directoryLoader = new DirectoryLoader(filePath, {
       '.pdf': (path) => new CustomPDFLoader(path),
