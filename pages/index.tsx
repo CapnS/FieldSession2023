@@ -12,6 +12,7 @@ import http from 'http';
 import { GetServerSideProps } from 'next';
 import { parseCookies } from 'nookies';
 import WarningPopUp from 'pages/warningPopUp';
+import { name } from '../pages/logIn';
 
 import {
   Accordion,
@@ -45,7 +46,6 @@ export default function Home() {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const [warningVisible, setWarningVisible] = useState(false);
-  //CREATE WARNING POP UP
   //CREATE WARNING POP UP
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -345,7 +345,7 @@ export default function Home() {
                     placeholder={
                       loading
                         ? 'Waiting for response...'
-                        : 'What is this legal case about?'
+                        : 'What is this legal case about?' 
                     }
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
